@@ -5,8 +5,6 @@ The WP IRC Contributors project is an IRC bot intended to automatically identify
 
 Currently there are multiple metrics being recorded to try and identify which one (or combination of ones) that best serves our purpose to keep things fair, but at the same time avoid people gaming the system for internet points.
 
-Markdown is a lightweight markup language based on the formatting conventions that people naturally use in email.  As [John Gruber] writes on the [Markdown site] [1]:
-
 Dependencies
 -----------
 

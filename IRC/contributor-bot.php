@@ -156,14 +156,14 @@ $irc = new Net_SmartIRC();
 /**
  * Set connection-wide configurations
  */
-$irc->setDebugLevel( SMARTIRC_DEBUG_NONE ); // Disable debug output
+$irc->setDebugLevel( SMARTIRC_DEBUG_ALL ); // Set debug mode
 $irc->setUseSockets( true ); // We want to use actual sockets, if this is false fsock will be used, which is not as ideal
 $irc->setChannelSyncing( true ); // Channel sync allows us to get user details which we use in our logs, this is how we can check if users are in the channel or not
 
 /**
  * Set up hooks for events to trigger on
  */
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '.*', $bot, 'channel_query' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'channel_query' );
 
 /**
  * Start the connection to an IRC server

@@ -17,41 +17,9 @@ class bot {
 	 */
 	function __construct() {
 		/**
-		 * If the database file doesn't exist it indicates this is a new setup
-		 */
-		if ( ! file_exists( DBFILE ) ) {
-			$new_db = '
-				CREATE TABLE messages (
-				    id              INTEGER         PRIMARY KEY AUTOINCREMENT,
-				    userhost        VARCHAR( 255 ),
-				    nickname        VARCHAR( 255 ),
-				    message         TEXT,
-				    is_question     BOOLEAN,
-				    is_appreciation TEXT,
-				    is_docbot       TEXT,
-				    time            DATETIME
-				)
-			';
-		}
-
-		/**
-		 * Let's make sure the path to the folder holding our database exists
-		 */
-		if ( ! is_dir( DBPATH ) ) {
-			mkdir( DBPATH, NULL, true );
-		}
-
-		/**
 		 * Prepare our database connection
 		 */
-		$this->db = new SQLite3( DBFILE );
-
-		/**
-		 * If we detected this as a new database, create our log table
-		 */
-		if ( isset( $new_db ) && ! empty( $new_db ) ) {
-			$this->db->query( $new_db );
-		}
+		$this->db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS );
 
 		/**
 		 * We replace the comma separated list of appreciative terms with pipes
@@ -135,13 +103,13 @@ class bot {
 					time
 				)
 			VALUES (
-				'" . $this->db->escapeString( $data->nick . "!" . $data->ident . "@" . $data->host ) . "',
-				'" . $this->db->escapeString( $data->nick ) . "',
-				'" . $this->db->escapeString( $data->message ) . "',
-				'" . ( $is_question ? 1 : 0 ) . "',
-				'" . $this->db->escapeString( ( ! $is_docbot ? NULL : $is_docbot ) ) . "',
-				'" . $this->db->escapeString( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : NULL ) ) . "',
-				'" . $this->db->escapeString( date( "Y-m-d H:i:s" ) ) . "'
+				" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
+				" . $this->db->quote( $data->nick ) . ",
+				" . $this->db->quote( $data->message ) . ",
+				" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
+				" . $this->db->quote( ( ! $is_docbot ? NULL : $is_docbot ) ) . ",
+				" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : NULL ) ) . ",
+				" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
 			)
 		" );
 	}

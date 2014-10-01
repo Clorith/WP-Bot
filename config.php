@@ -15,7 +15,9 @@ define( 'IRC_CHANNELS', '#wordpress' );
 define( 'APPRECIATION', 'thx,thank,cheers' );
 
 /**
- * Path to our SQLite database
+ * Database definitions
  */
-define( 'DBPATH', ABSPATH . '/../database/' );
-define( 'DBFILE', ABSPATH . '/../database/sqlite.db' );
+define( 'DB_HOST', '' );
+define( 'DB_USER', '' );
+define( 'DB_PASS', '' );
+define( 'DB_NAME', '' );

@@ -11,21 +11,40 @@ require_once( ABSPATH . '/IRC-framework/SmartIRC.php' );
  */
 class bot {
 	private $appreciation = array();
+	private $db;
 
 	/**
 	 * The class construct prepares our functions and database connections
 	 */
 	function __construct() {
 		/**
-		 * Prepare our database connection
+		 * Prepare our initial database connection
 		 */
-		$this->db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS );
+		$this->db_connector();
 
 		/**
 		 * We replace the comma separated list of appreciative terms with pipes
 		 * This is done because we run a bit of regex over it to identify words for consistency
 		 */
 		$this->appreciation = str_replace( ',', '|', strtolower( APPRECIATION ) );
+	}
+
+	function db_connector() {
+		/**
+		 * Prepare our database connection
+		 */
+		$attributes = array(
+			PDO::ATTR_PERSISTENT => true
+		);
+		$this->db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, $attributes );
+	}
+
+	function pdo_ping() {
+		try {
+			$this->db->query( "SELECT 1" );
+		} catch ( PDOException $e ) {
+			$this->db_connector();
+		}
 	}
 
 	/**
@@ -91,6 +110,14 @@ class bot {
 			}
 		}
 
+		/**
+		 * Ping the server first to make sure we still have a connection
+		 */
+		$this->pdo_ping();
+
+		/**
+		 * Insert the log entry
+		 */
 		$this->db->query( "
 			INSERT INTO
 				messages (

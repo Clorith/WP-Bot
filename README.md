@@ -8,7 +8,7 @@ Currently there are multiple metrics being recorded to try and identify which on
 Dependencies
 -----------
 
-The bot is ran on PHP, both to keep it portable, but also because the WordPress project already runs a few resources this way and by utilizing the same libraries we ensure that the project doesn't stop if something hapopens to a single person:
+The bot is ran on PHP, both to keep it portable, but also because the WordPress project already runs a few resources this way and by utilizing the same libraries we ensure that the project doesn't stop if something happens to a single person:
 
 * PHP
 * SQLite3 - Portable database, yay!

@@ -126,6 +126,7 @@ class bot {
 						userhost,
 						nickname,
 						message,
+						event,
 						is_question,
 						is_docbot,
 						is_appreciation,
@@ -135,6 +136,7 @@ class bot {
 					" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
 					" . $this->db->quote( $data->nick ) . ",
 					" . $this->db->quote( $data->message ) . ",
+					'message',
 					" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
 					" . $this->db->quote( ( ! $is_docbot ? null : $is_docbot ) ) . ",
 					" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : null ) ) . ",
@@ -145,6 +147,33 @@ class bot {
 			echo 'PDO Exception: ' . $e->getMessage();
 		}
 	}
+
+	function log_event( $event, &$irc, &$data ) {
+		$this->pdo_ping();
+
+		$this->db->query( "
+			INSERT INTO
+				messages (
+					userhost,
+					nickname,
+					message,
+					event,
+					time
+				)
+			VALUES (
+				" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
+				" . $this->db->quote( $data->nick ) . ",
+				" . $this->db->quote( $data->message ) . ",
+				" . $this->db->quote( $event ) . ",
+				" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
+			)
+		" );
+	}
+
+	function log_kick( &$irc, &$data ) { $this->log_event( 'kick', $irc, $data ); }
+	function log_part( &$irc, &$data ) { $this->log_event( 'part', $irc, $data ); }
+	function log_quit( &$irc, &$data ) { $this->log_event( 'quit', $irc, $data ); }
+	function log_join( &$irc, &$data ) { $this->log_event( 'join', $irc, $data ); }
 }
 
 /**
@@ -164,6 +193,11 @@ $irc->setChannelSyncing( true ); // Channel sync allows us to get user details w
  * Set up hooks for events to trigger on
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'channel_query' );
+$irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' );
+$irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
+$irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
+$irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
+$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/./', $bot, 'log_join' );
 
 /**
  * Start the connection to an IRC server

@@ -34,7 +34,8 @@ class bot {
 		 * Prepare our database connection
 		 */
 		$attributes = array(
-			PDO::ATTR_PERSISTENT => true
+			PDO::ATTR_PERSISTENT => true,
+			PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION
 		);
 		$this->db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, $attributes );
 	}
@@ -115,30 +116,34 @@ class bot {
 		 */
 		$this->pdo_ping();
 
-		/**
-		 * Insert the log entry
-		 */
-		$this->db->query( "
-			INSERT INTO
-				messages (
-					userhost,
-					nickname,
-					message,
-					is_question,
-					is_docbot,
-					is_appreciation,
-					time
+		try {
+			/**
+			 * Insert the log entry
+			 */
+			$this->db->query( "
+				INSERT INTO
+					messages (
+						userhost,
+						nickname,
+						message,
+						is_question,
+						is_docbot,
+						is_appreciation,
+						time
+					)
+				VALUES (
+					" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
+					" . $this->db->quote( $data->nick ) . ",
+					" . $this->db->quote( $data->message ) . ",
+					" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
+					" . $this->db->quote( ( ! $is_docbot ? null : $is_docbot ) ) . ",
+					" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : null ) ) . ",
+					" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
 				)
-			VALUES (
-				" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
-				" . $this->db->quote( $data->nick ) . ",
-				" . $this->db->quote( $data->message ) . ",
-				" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
-				" . $this->db->quote( ( ! $is_docbot ? NULL : $is_docbot ) ) . ",
-				" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : NULL ) ) . ",
-				" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
-			)
-		" );
+			" );
+		} catch ( PDOException $e ) {
+			echo 'PDO Exception: ' . $e->getMessage();
+		}
 	}
 }
 

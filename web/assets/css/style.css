@@ -1,0 +1,5 @@
+.activity,
+.nickname,
+.timestamp {
+	white-space: nowrap;
+}

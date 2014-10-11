@@ -8,10 +8,10 @@ Currently there are multiple metrics being recorded to try and identify which on
 Dependencies
 -----------
 
-The bot is ran on PHP, both to keep it portable, but also because the WordPress project already runs a few resources this way and by utilizing the same libraries we ensure that the project doesn't stop if something happens to a single person:
+The bot is ran on PHP, both to keep it portable, but also because the WordPress project already runs a few resources this way and by utilizing the same libraries we ensure that the project doesn't stop if something happens to a single person.
 
 * PHP
-* SQLite3 - Portable database, yay!
+* MySQL - We use [MariaDB] as a drop-in replacement
 * [SmartIRC] - A PHP library for interacting with IRC
 
 Install & Run
@@ -24,6 +24,7 @@ php contributor-bot.php
 ```
 
 General configurations are done in `config.php`
+Remember to import the content from `database\database.sql` to properly set up your SQL.
 
 License
 ----
@@ -31,3 +32,4 @@ License
 We use the GPLv2 license which allows anyone to play around with our code in any way they like, have fun!
 
 [SmartIRC]:https://github.com/pear/Net_SmartIRC
+[MariaDB]:https://mariadb.org/

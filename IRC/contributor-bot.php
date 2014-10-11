@@ -65,7 +65,7 @@ class bot {
 		$is_question     = false;
 		$is_appreciation = false;
 
-		if ( stristr( trim( $data->message ), '?' ) ) {
+		if ( '?' == substr( trim( $data->message ), -1 ) ) {
 			$is_question = true;
 		}
 

@@ -136,10 +136,10 @@
 		<table class="table table-striped">
 			<thead>
 			<tr>
-				<th>&nbsp;</th>
+				<th class="text-left">Timestamp</th>
 				<th>Nick</th>
 				<th>Message</th>
-				<th class="text-right">Timestamp</th>
+				<th>&nbsp;</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -178,10 +178,10 @@
 
 						echo '
 							<tr>
-								<td class="activity">' . $icon . '</td>
+								<td class="text-left timestamp">' . $log->time . '</td>
 								<td class="nickname"><a href="details.php?nickname=' . urlencode( $log->nickname ) . '">' . $log->nickname . '</a></td>
 								<td class="message">' . htmlspecialchars( $log->message ) . '</td>
-								<td class="text-right timestamp">' . $log->time . '</td>
+								<td class="text-right activity">' . $icon . '</td>
 							</tr>
 						';
 					}

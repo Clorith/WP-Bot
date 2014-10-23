@@ -26,6 +26,12 @@ php contributor-bot.php
 General configurations are done in `config.php`
 Remember to import the content from `database\database.sql` to properly set up your SQL.
 
+To-do
+----
+What needs to be done
+* Are we logging what we need to get the metrics for a baseline contributor
+* Find a reliable formula to use the contributions, see `C-level` from the web interface
+
 License
 ----
 

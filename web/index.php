@@ -4,6 +4,8 @@
 	require_once( ABSPATH . '/../config.php' );
 
 	require_once( ABSPATH . '/header.php' );
+
+	$date = ( isset( $_GET['date'] ) ? $_GET['date'] : date( "Y-m-d" ) );
 ?>
 
 <div class="row">
@@ -20,21 +22,26 @@
 	<?php
 		$logs = $db->query( "
 			SELECT
-				id,
-				nickname,
-				message,
-				event,
-				is_question,
-				is_appreciation,
-				is_docbot,
-				time
+			SQL_CALC_FOUND_ROWS
+				m.id,
+				m.nickname,
+				m.message,
+				m.event,
+				m.is_question,
+				m.is_appreciation,
+				m.is_docbot,
+				m.time
 			FROM
-				messages
+				messages m
+			WHERE
+				m.time BETWEEN " . $db->quote( $date . ' 00:00:00' ) . " AND " . $db->quote( $date . ' 23:59:59' ) . "
 			ORDER BY
-				id DESC
-			LIMIT
-				100
+				m.id DESC
 		" );
+
+		$query_count = $db->query( "SELECT FOUND_ROWS() as total;" );
+		$query_count = $query_count->fetchObject();
+
 		while ( $log = $logs->fetchObject() ) {
 			$tr_class = array();
 			$icon     = '';
@@ -87,16 +94,13 @@
 	</table>
 </div>
 
-<div class="row text-center">
-	<ul class="pagination">
-		<li class="disabled"><a href="#">&laquo;</a></li>
-		<li class="active"><a href="#">1</a></li>
-		<li><a href="#">2</a></li>
-		<li><a href="#">3</a></li>
-		<li><a href="#">4</a></li>
-		<li><a href="#">5</a></li>
-		<li><a href="#">&raquo;</a></li>
-	</ul>
+<div class="row">
+	<nav>
+		<ul class="pager">
+			<li class="previous"><a href="details.php?date=<?php echo date( "Y-m-d", strtotime( '+1 day', strtotime( $date ) ) ); ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+			<li class="next"><a href="details.php?date=<?php echo date( "Y-m-d", strtotime( '-1 day', strtotime( $date ) ) ); ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+		</ul>
+	</nav>
 </div>
 
 <?php

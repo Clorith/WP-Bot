@@ -57,15 +57,19 @@
 			 */
 			if ( 'quit' == $log->event ) {
 				$tr_class[] = 'warning';
+				$log->message = '[QUIT] ' . $log->message;
 			}
 			if ( 'part' == $log->event ) {
 				$tr_class[] = 'warning';
+				$log->message = '[PART] ' . $log->message;
 			}
 			if ( 'kick' == $log->event ) {
 				$tr_class[] = 'danger';
+				$log->message = '[KICK] ' . $log->message;
 			}
 			if ( 'join' == $log->event ) {
 				$tr_class[] = 'info';
+				$log->message = '[JOIN] ' . $log->message;
 			}
 
 

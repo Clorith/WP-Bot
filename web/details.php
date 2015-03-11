@@ -145,24 +145,31 @@
 			<tbody>
 			<?php
 				try {
+					$page = ( isset( $_GET['paged'] ) && ctype_digit( $_GET['paged'] ) ? ( $_GET['paged'] ) : 1 );
+
 					$logs = $db->query( "
 						SELECT
-							id,
-							nickname,
-							message,
-							is_question,
-							is_appreciation,
-							is_docbot,
-							time
+						SQL_CALC_FOUND_ROWS
+							m.id,
+							m.nickname,
+							m.message,
+							m.is_question,
+							m.is_appreciation,
+							m.is_docbot,
+							m.time
 						FROM
-							messages
+							messages m
 						WHERE
-							nickname = " . $db->quote( $_GET['nickname'] ) . "
+							m.nickname = " . $db->quote( $_GET['nickname'] ) . "
 						ORDER BY
-							id DESC
+							m.id DESC
 						LIMIT
-							100
+							" . ( ( $page - 1 ) * 100 ) . ", 100
 					" );
+
+					$query_count = $db->query( "SELECT FOUND_ROWS() as total;" );
+					$query_count = $query_count->fetchObject();
+
 					while ( $log = $logs->fetchObject() ) {
 						$icon = '';
 
@@ -191,6 +198,28 @@
 			?>
 			</tbody>
 		</table>
+	</div>
+
+	<div class="row">
+		<?php
+			$has_next_page = false;
+			$has_prev_page = false;
+
+			$total_pages = ceil( $query_count->total / 100 );
+
+			if ( $page > 1 ) {
+				$has_prev_page = true;
+			}
+			if ( $page < $total_pages ) {
+				$has_next_page = true;
+			}
+		?>
+		<nav>
+			<ul class="pager">
+				<li class="previous <?php echo ( ! $has_prev_page ? 'disabled' : '' ); ?>"><a href="details.php?nickname=<?php echo $_GET['nickname']; ?>&paged=<?php echo ( $page - 1 ); ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+				<li class="next <?php echo ( ! $has_next_page ? 'disabled' : '' ); ?>"><a href="details.php?nickname=<?php echo $_GET['nickname']; ?>&paged=<?php echo ( $page + 1 ); ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+			</ul>
+		</nav>
 	</div>
 
 

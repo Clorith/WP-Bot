@@ -210,7 +210,11 @@
 
 						echo '
 							<tr>
-								<td class="text-left timestamp">' . $log->time . '</td>
+								<td class="text-left timestamp">
+									<a href="index.php?date=' . date( "Y-m-d", strtotime( $log->time ) ) . '#' . $log->id . '">
+										' . $log->time . '
+									</a>
+								</td>
 								<td class="nickname"><a href="details.php?nickname=' . urlencode( $log->nickname ) . '">' . $log->nickname . '</a></td>
 								<td class="message">' . htmlspecialchars( $log->message ) . '</td>
 								<td class="text-right activity">' . $icon . '</td>

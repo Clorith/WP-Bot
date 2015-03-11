@@ -9,6 +9,15 @@
 ?>
 
 <div class="row">
+	<nav>
+		<ul class="pager">
+			<li class="previous"><a href="index.php?date=<?php echo date( "Y-m-d", strtotime( '+1 day', strtotime( $date ) ) ); ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+			<li class="next"><a href="index.php?date=<?php echo date( "Y-m-d", strtotime( '-1 day', strtotime( $date ) ) ); ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+		</ul>
+	</nav>
+</div>
+
+<div class="row">
 	<table class="table table-striped">
 		<thead>
 			<tr>
@@ -85,7 +94,11 @@
 					<td class="activity">' . $icon . '</td>
 					<td class="nickname"><a href="details.php?nickname=' . urlencode( $log->nickname ) . '">' . $log->nickname . '</a></td>
 					<td class="message">' . htmlspecialchars( $log->message ) . '</td>
-					<td class="text-right timestamp">' . $log->time . '</td>
+					<td class="text-right timestamp">
+						<a href="index.php?date=' . $date . '#' . $log->id . '" name="' . $log->id . '">
+							' . $log->time . '
+						</a>
+					</td>
 				</tr>
 			';
 		}
@@ -94,14 +107,14 @@
 	</table>
 </div>
 
-<div class="row">
-	<nav>
-		<ul class="pager">
-			<li class="previous"><a href="details.php?date=<?php echo date( "Y-m-d", strtotime( '+1 day', strtotime( $date ) ) ); ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
-			<li class="next"><a href="details.php?date=<?php echo date( "Y-m-d", strtotime( '-1 day', strtotime( $date ) ) ); ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
-		</ul>
-	</nav>
-</div>
+	<div class="row">
+		<nav>
+			<ul class="pager">
+				<li class="previous"><a href="index.php?date=<?php echo date( "Y-m-d", strtotime( '+1 day', strtotime( $date ) ) ); ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+				<li class="next"><a href="index.php?date=<?php echo date( "Y-m-d", strtotime( '-1 day', strtotime( $date ) ) ); ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+			</ul>
+		</nav>
+	</div>
 
 <?php
 	require_once( ABSPATH . '/footer.php' );

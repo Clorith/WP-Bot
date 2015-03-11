@@ -7,7 +7,30 @@
 ?>
 
 <div class="page-header">
-	<h1><?php echo htmlentities( $_GET['nickname'] ); ?></h1>
+	<?php
+		$name_match = array();
+
+		$look_up_names = $db->query( "
+			SELECT
+				DISTINCT m.nickname
+			FROM
+				messages m
+			WHERE
+				nickname LIKE " . $db->quote( '%' . $_GET['nickname'] . '%' ) . "
+		" );
+		while ( $check_name = $look_up_names->fetchObject() ) {
+			$name_match[] = $check_name->nickname;
+		}
+
+		printf(
+			'<h1>%s %s</h1>',
+			htmlentities( $_GET['nickname'] ),
+			( empty( $name_match ) ? : sprintf(
+				'<small>Potential related names: %s</small>',
+				implode( ', ', $name_match )
+			) )
+		);
+	?>
 </div>
 
 <div class="row">

@@ -17,3 +17,16 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `time` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `stats_30d`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_30d` (
+  `nickname` varchar(255) NOT NULL,
+  `messages` int(11) NOT NULL,
+  `appreciation` int(11) NOT NULL,
+  `questions` int(11) NOT NULL,
+  `docbot` int(11) NOT NULL,
+  UNIQUE KEY `nickname` (`nickname`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

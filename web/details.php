@@ -10,13 +10,32 @@
 	<?php
 		$name_match = array();
 
+		$hostname = $db->query( "
+			SELECT
+				m.userhost
+			FROM
+				messages m
+			WHERE
+				m.nickname = " . $db->quote( $_GET['nickname'] ) . "
+			ORDER BY
+				m.id DESC
+			LIMIT 1
+		" );
+		$hostname = $hostname->fetchObject();
+		preg_match( "/^(.+?)!(.+?)@(.+?)$/si", $hostname->userhost, $hostmask );
+
 		$look_up_names = $db->query( "
 			SELECT
 				DISTINCT m.nickname
 			FROM
 				messages m
-			WHERE
-				m.nickname LIKE " . $db->quote( '%' . $_GET['nickname'] . '%' ) . "
+			WHERE (
+				m.nickname LIKE " . $db->quote( '%' . $hostmask[1] . '%' ) . "
+				OR
+				m.userhost LIKE " . $db->quote( '%!' . $hostmask[2] . '@%' ) . "
+				OR
+				m.userhost LIKE " . $db->quote( '%@' . $hostmask[3] )  ."
+				)
 			AND
 				m.nickname != " . $db->quote( $_GET['nickname'] ) . "
 		" );

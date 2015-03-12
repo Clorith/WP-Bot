@@ -73,18 +73,22 @@
 			 */
 			if ( 'quit' == $log->event ) {
 				$tr_class[] = 'warning';
+				$tr_class[] = 'status-quit';
 				$log->message = '[QUIT] ' . $log->message;
 			}
 			if ( 'part' == $log->event ) {
 				$tr_class[] = 'warning';
+				$tr_class[] = 'status-part';
 				$log->message = '[PART] ' . $log->message;
 			}
 			if ( 'kick' == $log->event ) {
 				$tr_class[] = 'danger';
+				$tr_class[] = 'status-kick';
 				$log->message = '[KICK] ' . $log->message;
 			}
 			if ( 'join' == $log->event ) {
 				$tr_class[] = 'info';
+				$tr_class[] = 'status-join';
 				$log->message = '[JOIN] ' . $log->message;
 			}
 

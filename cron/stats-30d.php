@@ -11,6 +11,11 @@ $db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS,
 
 $nicknames = array();
 
+/**
+ * Start by truncating the existing data
+ */
+$db->query( "TRUNCATE TABLE `stats_30d`" );
+
 $messages = $db->query( "
 	SELECT
 		m.nickname,

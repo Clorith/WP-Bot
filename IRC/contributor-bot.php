@@ -5,6 +5,12 @@ require_once( ABSPATH . '/../config.php' );
 require_once( ABSPATH . '/IRC-framework/SmartIRC.php' );
 
 /**
+ * Grab dependencies
+ */
+require_once( ABSPATH . '/doc-bot.php' );
+
+
+/**
  * Class bot
  *
  * Contains our custom IRC functions
@@ -37,7 +43,7 @@ class bot {
 			PDO::ATTR_PERSISTENT => true,
 			PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION
 		);
-		$this->db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, $attributes );
+		$this->db   = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, $attributes );
 	}
 
 	function pdo_ping() {
@@ -65,7 +71,7 @@ class bot {
 		$is_question     = false;
 		$is_appreciation = false;
 
-		if ( '?' == substr( trim( $data->message ), -1 ) ) {
+		if ( '?' == substr( trim( $data->message ), - 1 ) ) {
 			$is_question = true;
 		}
 
@@ -73,7 +79,7 @@ class bot {
 			$is_appreciation = array();
 
 			$string = explode( " ", $data->message );
-			foreach( $string AS $word ) {
+			foreach ( $string AS $word ) {
 				$word = $this->cleanNick( $word );
 
 				if ( $irc->isJoined( $data->channel, $word ) ) {
@@ -98,7 +104,7 @@ class bot {
 			 * If block denoting if the first letter is the doc-bot command trigger
 			 */
 			if ( '.' == substr( $data->message, 0, 1 ) ) {
-				$string = explode( " ", $data->message );
+				$string  = explode( " ", $data->message );
 				$is_nick = $this->cleanNick( array_pop( $string ) );
 
 				/**
@@ -106,7 +112,7 @@ class bot {
 				 */
 				if ( $irc->isJoined( $data->channel, $is_nick ) ) {
 					$is_appreciation = array( $data->nick );
-					$is_docbot = $is_nick;
+					$is_docbot       = $is_nick;
 				}
 			}
 		}
@@ -121,28 +127,28 @@ class bot {
 			 * Insert the log entry
 			 */
 			$this->db->query( "
-				INSERT INTO
-					messages (
-						userhost,
-						nickname,
-						message,
-						event,
-						is_question,
-						is_docbot,
-						is_appreciation,
-						time
-					)
-				VALUES (
-					" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
-					" . $this->db->quote( $data->nick ) . ",
-					" . $this->db->quote( $data->message ) . ",
-					'message',
-					" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
-					" . $this->db->quote( ( ! $is_docbot ? null : $is_docbot ) ) . ",
-					" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : null ) ) . ",
-					" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
+			INSERT INTO
+				messages (
+					userhost,
+					nickname,
+					message,
+					event,
+					is_question,
+					is_docbot,
+					is_appreciation,
+					time
 				)
-			" );
+			VALUES (
+				" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
+				" . $this->db->quote( $data->nick ) . ",
+				" . $this->db->quote( $data->message ) . ",
+				'message',
+				" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
+				" . $this->db->quote( ( ! $is_docbot ? null : $is_docbot ) ) . ",
+				" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : null ) ) . ",
+				" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
+			)
+		" );
 		} catch ( PDOException $e ) {
 			echo 'PDO Exception: ' . $e->getMessage();
 		}
@@ -152,35 +158,47 @@ class bot {
 		$this->pdo_ping();
 
 		$this->db->query( "
-			INSERT INTO
-				messages (
-					userhost,
-					nickname,
-					message,
-					event,
-					time
-				)
-			VALUES (
-				" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
-				" . $this->db->quote( $data->nick ) . ",
-				" . $this->db->quote( $data->message ) . ",
-				" . $this->db->quote( $event ) . ",
-				" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
+		INSERT INTO
+			messages (
+				userhost,
+				nickname,
+				message,
+				event,
+				time
 			)
-		" );
+		VALUES (
+			" . $this->db->quote( $data->nick . "!" . $data->ident . "@" . $data->host ) . ",
+			" . $this->db->quote( $data->nick ) . ",
+			" . $this->db->quote( $data->message ) . ",
+			" . $this->db->quote( $event ) . ",
+			" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
+		)
+	" );
 	}
 
-	function log_kick( &$irc, &$data ) { $this->log_event( 'kick', $irc, $data ); }
-	function log_part( &$irc, &$data ) { $this->log_event( 'part', $irc, $data ); }
-	function log_quit( &$irc, &$data ) { $this->log_event( 'quit', $irc, $data ); }
-	function log_join( &$irc, &$data ) { $this->log_event( 'join', $irc, $data ); }
+	function log_kick( &$irc, &$data ) {
+		$this->log_event( 'kick', $irc, $data );
+	}
+
+	function log_part( &$irc, &$data ) {
+		$this->log_event( 'part', $irc, $data );
+	}
+
+	function log_quit( &$irc, &$data ) {
+		$this->log_event( 'quit', $irc, $data );
+	}
+
+	function log_join( &$irc, &$data ) {
+		$this->log_event( 'join', $irc, $data );
+	}
 }
 
 /**
  * Instantiate our bot class and the SmartIRC framework
  */
-$bot = new bot();
-$irc = new Net_SmartIRC();
+$bot     = new bot();
+$doc_bot = new DocBot();
+$irc     = new Net_SmartIRC();
 
 /**
  * Set connection-wide configurations
@@ -198,6 +216,12 @@ $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
 $irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
 $irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/./', $bot, 'log_join' );
+
+/**
+ * DocBot class hooks
+ */
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?', $doc_bot, 'developer' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?', $doc_bot, 'codex' );
 
 /**
  * Start the connection to an IRC server

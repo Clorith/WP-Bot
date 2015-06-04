@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `nickname` varchar(255) NOT NULL,
   `message` text NOT NULL,
   `event` varchar(255) NOT NULL DEFAULT 'message',
+  `channel` varchar(255) NOT NULL DEFAULT '#wordpress'
   `is_question` tinyint(1) NOT NULL,
   `is_appreciation` text NOT NULL,
   `is_docbot` text NOT NULL,

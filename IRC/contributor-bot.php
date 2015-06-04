@@ -133,6 +133,7 @@ class bot {
 					nickname,
 					message,
 					event,
+					channel,
 					is_question,
 					is_docbot,
 					is_appreciation,
@@ -143,6 +144,7 @@ class bot {
 				" . $this->db->quote( $data->nick ) . ",
 				" . $this->db->quote( $data->message ) . ",
 				'message',
+				" . $this->db->quote( $data->channel ) . ",
 				" . $this->db->quote( ( $is_question ? 1 : 0 ) ) . ",
 				" . $this->db->quote( ( ! $is_docbot ? null : $is_docbot ) ) . ",
 				" . $this->db->quote( ( is_array( $is_appreciation ) ? serialize( $is_appreciation ) : null ) ) . ",
@@ -164,6 +166,7 @@ class bot {
 				nickname,
 				message,
 				event,
+				channel,
 				time
 			)
 		VALUES (
@@ -171,6 +174,7 @@ class bot {
 			" . $this->db->quote( $data->nick ) . ",
 			" . $this->db->quote( $data->message ) . ",
 			" . $this->db->quote( $event ) . ",
+			" . $this->db->quote( $data->channel ) . ",
 			" . $this->db->quote( date( "Y-m-d H:i:s" ) ) . "
 		)
 	" );
@@ -222,6 +226,8 @@ $irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/./', $bot, 'log_join' );
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?', $doc_bot, 'developer' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?', $doc_bot, 'codex' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?', $doc_bot, 'plugin' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?', $doc_bot, 'google' );
 
 /**
  * Start the connection to an IRC server

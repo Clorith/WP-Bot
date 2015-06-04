@@ -7,15 +7,12 @@
  * missing from the channel for whatever reason
  */
 class DocBot {
-	function is_doc_bot( $irc, $channel ) {
+	function is_doc_bot( &$irc, $channel ) {
 		return $irc->isJoined( $channel, 'doc-bot' );
 	}
-
-	function developer( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
+	function message_split( &$irc, $data ) {
 		$message_parse = explode( ' ', $data->message, 2 );
+		$command = $message_parse[0];
 		$message_parse = $message_parse[1];
 
 		$user = $data->nick;
@@ -27,27 +24,79 @@ class DocBot {
 				$user = $send_to;
 			}
 		}
+		$message = trim( $message_parse[0] );
 
-		$search = 'https://developer.wordpress.org/?s=%s&post_type%5B%5D=wp-parser-function&post_type%5B%5D=wp-parser-hook&post_type%5B%5D=wp-parser-class&post_type%5B%5D=wp-parser-method';
-		$string = trim( $message_parse[0] );
+		$result = (object) array(
+			'user'    => $user,
+			'message' => $message,
+			'command' => $command
+		);
 
+		return $result;
+	}
+	function google_result( $string ) {
+		$search = 'http://www.google.com/search?q=%s&btnI';
+
+		$string = urlencode( $string );
+		$search = str_replace( '%s', $string , $search );
+
+		$headers = get_headers( $search, true );
+
+		return $headers['Location'][1];
+	}
+
+	function developer( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+		$string = trim( $msg->message );
+
+		$search = 'https://developer.wordpress.org/?s=%s';
+		$lookup = false;
+		if ( stristr( $string, '+f' ) ) {
+			$lookup = true;
+			$string = str_replace( '+f', '', $string );
+			$search .= '&post_type%5B%5D=wp-parser-function';
+		}
+		if ( stristr( $string, '+h' ) ) {
+			$lookup = true;
+			$string = str_replace( '+h', '', $string );
+			$search .= '&post_type%5B%5D=wp-parser-hook';
+		}
+		if ( stristr( $string, '+c' ) ) {
+			$lookup = true;
+			$string = str_replace( '+c', '', $string );
+			$search .= '&post_type%5B%5D=wp-parser-class';
+		}
+		if ( stristr( $string, '+m' ) ) {
+			$lookup = true;
+			$string = str_replace( '+m', '', $string );
+			$search .= '&post_type%5B%5D=wp-parser-method';
+		}
+
+		if ( ! $lookup ) {
+			$search .= '&post_type%5B%5D=wp-parser-function';
+		}
+
+		$string = trim( $string );
 		$string = str_replace( array( ' ' ), array( '+' ), $string );
-		$search = sprintf( $search, $string );
+		$search = str_replace( '%s', $string , $search );
 
 		$headers = get_headers( $search, true );
 
 		if ( ! isset( $headers['Location'] ) || empty( $headers['Location'] ) ) {
 			$message = sprintf(
 				'%s: No exact match found for \'%s\' - See the full set of results at %s',
-				$user,
-				trim( $message_parse[0] ),
+				$msg->user,
+				$string,
 				$search
 			);
 		}
 		else {
 			$message = sprintf(
 				'%s: %s',
-				$user,
+				$msg->user,
 				$headers['Location']
 			);
 		}
@@ -59,42 +108,88 @@ class DocBot {
 		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
 			return;
 		}
-		$message_parse = explode( ' ', $data->message, 2 );
-		$message_parse = $message_parse[1];
+		$msg = $this->message_split( $irc, $data );
 
-		$user = $data->nick;
+		$google = $this->google_result( $msg->message . ' site:codex.wordpress.org' );
 
-		$message_parse = explode( '>', $message_parse );
-		if ( isset( $message_parse[1] ) && ! empty( $message_parse[1] ) ) {
-			$send_to = trim( $message_parse[1] );
-			if ( $irc->isJoined( $data->channel, $send_to ) ) {
-				$user = $send_to;
-			}
+		$message = sprintf(
+			'%s: %s',
+			$msg->user,
+			$google
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function plugin( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$url    = 'https://wordpress.org/plugins/' . str_replace( ' ', '-', $msg->message );
+		$search = 'https://wordpress.org/plugins/search.php?q=';
+
+		if ( preg_match( "/-l\b/i", $msg->message ) ) {
+			$msg->message = trim( str_replace( '-l', '', $msg->message ) );
+			$message = sprintf(
+				'%s: See a list of plugins relating to %s at %s',
+				$msg->user,
+				$msg->message,
+				$search . str_replace( ' ', '+', $msg->message )
+			);
+
+			$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+			return;
 		}
 
-		$search = 'http://codex.wordpress.org/index.php?title=Special:Search&search=';
-		$string = trim( $message_parse[0] );
+		$first_pass = get_headers( $url, true );
 
-		$string = str_replace( array( ' ' ), array( '+' ), $string );
-		$search .= $string;
-
-		$headers = get_headers( $search, true );
-
-		if ( ! isset( $headers['Location'] ) || empty( $headers['Location'] ) ) {
+		if ( isset( $first_pass['Status'] ) && ! stristr( $first_pass['Status'], '404 Not Found' ) ) {
 			$message = sprintf(
-				'%s: No exact match found for \'%s\' - See the full set of results at %s',
-				$user,
-				trim( $message_parse[0] ),
-				$search
+				'%s: %s',
+				$msg->user,
+				$url
+			);
+			$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+			return;
+		}
+
+		$page = file_get_contents( $search . str_replace( ' ', '+', $msg->message ) );
+		preg_match_all( "/plugin-card-top.+?column-name.+?<a.+?href=\"(.+?)\">(.+?)</msi", $page, $matches );
+
+		if ( ! empty( $matches[1] ) ) {
+			$message = sprintf(
+				'%s: %s - %s',
+				$msg->user,
+				$matches[2][0],
+				$matches[1][0]
 			);
 		}
 		else {
 			$message = sprintf(
-				'%s: %s',
-				$user,
-				$headers['Location']
+				'%s: No results found',
+				$msg->user
 			);
 		}
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function google( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$google = $this->google_result( $msg->message );
+
+		$message = sprintf(
+			'%s: Google result for %s - %s',
+			$msg->user,
+			$msg->message,
+			$google
+		);
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}

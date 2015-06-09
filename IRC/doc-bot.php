@@ -54,24 +54,24 @@ class DocBot {
 
 		$search = 'https://developer.wordpress.org/?s=%s';
 		$lookup = false;
-		if ( stristr( $string, '+f' ) ) {
+		if ( stristr( $string, '-f' ) ) {
 			$lookup = true;
-			$string = str_replace( '+f', '', $string );
+			$string = str_replace( '-f', '', $string );
 			$search .= '&post_type%5B%5D=wp-parser-function';
 		}
-		if ( stristr( $string, '+h' ) ) {
+		if ( stristr( $string, '-h' ) ) {
 			$lookup = true;
-			$string = str_replace( '+h', '', $string );
+			$string = str_replace( '-h', '', $string );
 			$search .= '&post_type%5B%5D=wp-parser-hook';
 		}
-		if ( stristr( $string, '+c' ) ) {
+		if ( stristr( $string, '-c' ) ) {
 			$lookup = true;
-			$string = str_replace( '+c', '', $string );
+			$string = str_replace( '-c', '', $string );
 			$search .= '&post_type%5B%5D=wp-parser-class';
 		}
-		if ( stristr( $string, '+m' ) ) {
+		if ( stristr( $string, '-m' ) ) {
 			$lookup = true;
-			$string = str_replace( '+m', '', $string );
+			$string = str_replace( '-m', '', $string );
 			$search .= '&post_type%5B%5D=wp-parser-method';
 		}
 

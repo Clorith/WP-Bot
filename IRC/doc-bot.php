@@ -193,4 +193,16 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+	
+	function help_cmd( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+		$google = $this->google_result( $msg->message );
+		$message = sprintf('For ContiBot Help, go to %s',
+			HELP_site
+		);
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

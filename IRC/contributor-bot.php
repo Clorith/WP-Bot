@@ -228,6 +228,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?', $doc_
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?', $doc_bot, 'codex' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?', $doc_bot, 'plugin' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?', $doc_bot, 'google' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)h(elp)?', $doc_bot, 'help_cmd' );
 
 /**
  * Start the connection to an IRC server

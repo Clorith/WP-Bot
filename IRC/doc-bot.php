@@ -199,8 +199,8 @@ class DocBot {
 			return;
 		}
 		$msg = $this->message_split( $irc, $data );
-		$message = sprintf('For ContiBot Help, go to %s',
-			HELP_site
+		$message = sprintf('For ContriBot Help, see %s',
+			HELP_URL
 		);
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}

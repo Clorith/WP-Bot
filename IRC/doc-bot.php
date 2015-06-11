@@ -199,7 +199,6 @@ class DocBot {
 			return;
 		}
 		$msg = $this->message_split( $irc, $data );
-		$google = $this->google_result( $msg->message );
 		$message = sprintf('For ContiBot Help, go to %s',
 			HELP_site
 		);

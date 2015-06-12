@@ -193,15 +193,4 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
-	
-	function help_cmd( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
-		$msg = $this->message_split( $irc, $data );
-		$message = sprintf('For ContriBot Help, see %s',
-			HELP_URL
-		);
-		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-	}
 }

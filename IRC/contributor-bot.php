@@ -195,6 +195,13 @@ class bot {
 	function log_join( &$irc, &$data ) {
 		$this->log_event( 'join', $irc, $data );
 	}
+
+	function help_cmd( &$irc, &$data ) {
+		$message = sprintf( 'For ContriBot Help, see %s',
+			HELP_URL
+		);
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }
 
 /**
@@ -222,13 +229,17 @@ $irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
 $irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/./', $bot, 'log_join' );
 
 /**
+ * Generic commands associated purely with ContriBot
+ */
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)h(elp)?\b', $bot, 'help_cmd' );
+
+/**
  * DocBot class hooks
  */
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?', $doc_bot, 'developer' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?', $doc_bot, 'codex' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?', $doc_bot, 'plugin' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?', $doc_bot, 'google' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)h(elp)?', $doc_bot, 'help_cmd' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?\b', $doc_bot, 'developer' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?\b', $doc_bot, 'codex' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?\b', $doc_bot, 'plugin' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?\b', $doc_bot, 'google' );
 
 /**
  * Start the connection to an IRC server

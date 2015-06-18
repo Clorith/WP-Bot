@@ -278,4 +278,18 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function make_blog( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s: To get started contributing to WordPress, have a look at the Make Blogs over at https://make.wordpress.org',
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

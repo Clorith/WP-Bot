@@ -246,6 +246,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $doc_bo
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)moving\b', $doc_bot, 'moving' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(inspect|inspector)\b', $doc_bot, 'inspector' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)wordpress\.com\b', $doc_bot, 'wordpresscom' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)make(-blog)?\b', $doc_bot, 'make_blog' );
 
 /**
  * Start the connection to an IRC server

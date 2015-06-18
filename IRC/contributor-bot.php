@@ -243,6 +243,8 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?\b', $doc_b
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(code|paste|pastebin)\b', $doc_bot, 'pastebin' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)first\b', $doc_bot, 'do_the_first' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $doc_bot, 'language' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)moving\b', $doc_bot, 'moving' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(inspect|inspector)\b', $doc_bot, 'inspector' );
 
 /**
  * Start the connection to an IRC server

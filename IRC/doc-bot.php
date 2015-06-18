@@ -236,4 +236,32 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function moving( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s: If you rename the WordPress directory on your server, switch ports or change the hostname http://codex.wordpress.org/Moving_WordPress applies',
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function inspector( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s: Please use the built-in Developer Tools of your browser to fix problems with your website. Right click your page and pick “Inspect Element” (Cr, FF, Op) or press F12-button (IE) to track down CSS problems. Use the console to see JavaScript bugs.',
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

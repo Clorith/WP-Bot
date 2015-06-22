@@ -292,4 +292,19 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function count( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+
+		$counter = file_get_contents( 'https://wordpress.org/download/counter/?ajaxupdate=1' );
+
+		$message = sprintf(
+			'The latest version of WordPress has been downloaded %s times',
+			$counter
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

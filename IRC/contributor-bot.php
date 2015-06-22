@@ -250,6 +250,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)make(-blog)?\b', $do
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $doc_bot, 'count' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)_\b', $doc_bot, 'underscores' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)777\b', $doc_bot, 'lucky_seven' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ftp\b', $doc_bot, 'ftp' );
 
 /**
  * Start the connection to an IRC server

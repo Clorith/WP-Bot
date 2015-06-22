@@ -335,4 +335,18 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function ftp( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s:  If WordPress keeps asking you for FTP credentials see http://codex.wordpress.org/Updating_WordPress#Automatic_Update and http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants as well as http://s.sivel.net/wpfsmethod for more information about the file system method selection and http://v007.me/4 for forcing direct file system writes',
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

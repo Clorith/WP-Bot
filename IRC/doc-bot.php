@@ -112,6 +112,10 @@ class DocBot {
 
 		$google = $this->google_result( $msg->message . ' site:codex.wordpress.org' );
 
+		if ( preg_match( '/codex\.wordpress\.org\/(.{2,5}:).+?/i', $google, $language ) ) {
+			$google = str_ireplace( $language[1], '', $google );
+		}
+
 		$message = sprintf(
 			'%s: %s',
 			$msg->user,

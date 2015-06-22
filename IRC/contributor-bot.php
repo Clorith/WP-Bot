@@ -248,6 +248,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(inspect|inspector)\
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)wordpress\.com\b', $doc_bot, 'wordpresscom' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)make(-blog)?\b', $doc_bot, 'make_blog' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $doc_bot, 'count' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)_\b', $doc_bot, 'underscores' );
 
 /**
  * Start the connection to an IRC server

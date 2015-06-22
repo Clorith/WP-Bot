@@ -307,4 +307,18 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function underscores( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s: Check out http://underscores.me/ - Underscores is a starter theme ment to be the base of your next awesome theme, try it out!',
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

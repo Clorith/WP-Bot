@@ -321,4 +321,18 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function lucky_seven( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s: Setting file permissions to 777 is inherently insecure, please read http://codex.wordpress.org/Changing_File_Permissions',
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

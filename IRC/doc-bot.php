@@ -234,8 +234,9 @@ class DocBot {
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
-			'%s: We try to keep this channel PG13, please keep the language appropriate for all ages.',
-			$msg->user
+			'%s: Please help us keep %s a family friendly room, and avoid using foul language.',
+			$msg->user,
+			$data->channel
 		);
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

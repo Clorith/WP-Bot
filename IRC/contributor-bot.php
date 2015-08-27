@@ -252,6 +252,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(_|underscores)\b', 
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)777\b', $doc_bot, 'lucky_seven' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ftp\b', $doc_bot, 'ftp' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)hacked\b', $doc_bot, 'hacked' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)next\b', $doc_bot, 'next' );
 
 /**
  * Start the connection to an IRC server

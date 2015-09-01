@@ -320,7 +320,7 @@ class DocBot {
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
-			'%s: Check out http://underscores.me/ - Underscores is a starter theme ment to be the base of your next awesome theme, try it out!',
+			'%s: Check out http://underscores.me/ - Underscores is a starter theme meant to be the base of your next awesome theme, try it out!',
 			$msg->user
 		);
 

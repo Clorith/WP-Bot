@@ -541,25 +541,15 @@ class DocBot {
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
 
-	function downloaded( &$irc, &$data ) {
+	function donthack( &$irc, &$data ) {
 		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
 			return;
 		}
 		$msg = $this->message_split( $irc, $data );
 
-		$url = 'https://wordpress.org/download/counter/?ajaxupdate=1';
-		$ch = curl_init();
-
-		curl_setopt($ch,CURLOPT_URL, $url);
-		// curl_setopt($ch,CURLOPT_POST, count($fields));
-		// curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
-		$result = curl_exec($ch);
-		curl_close($ch);
-
 		$message = sprintf(
-			'%s: WordPress has been downloaded %s times',
-			$msg->user,
-			$result
+			'%s: http://codex.wordpress.org/images/b/b3/donthack.jpg',
+			$msg->user
 		);
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

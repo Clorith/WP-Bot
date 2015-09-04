@@ -264,8 +264,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bo
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $doc_bot, 'downloaded' );
-
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)donthack\b', $doc_bot, 'donthack' );
 
 /**
  * Start the connection to an IRC server

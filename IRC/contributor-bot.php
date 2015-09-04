@@ -253,6 +253,14 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)777\b', $doc_bot, 'l
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ftp\b', $doc_bot, 'ftp' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)hacked\b', $doc_bot, 'hacked' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)next\b', $doc_bot, 'next' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)related\b', $doc_bot, 'related' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)css\b', $doc_bot, 'css' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)html\b', $doc_bot, 'html' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)javascript\b', $doc_bot, 'javascript' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)php\b', $doc_bot, 'php' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)rtfm\b', $doc_bot, 'rtfm' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bot, 'possible' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 
 /**
  * Start the connection to an IRC server

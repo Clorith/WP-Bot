@@ -226,7 +226,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' 
 $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
 $irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
-$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/./', $bot, 'log_join' );
+$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $bot, 'log_join' );
 
 /**
  * Generic commands associated purely with ContriBot
@@ -264,7 +264,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bo
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)donthack\b', $doc_bot, 'donthack' );
+
 
 /**
  * Start the connection to an IRC server

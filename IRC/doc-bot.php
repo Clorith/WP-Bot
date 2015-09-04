@@ -198,6 +198,23 @@ class DocBot {
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
 
+	function lmgtfy( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$query = urlencode( $msg->message );
+
+		$message = sprintf(
+			'%s: http://lmgtfy.com/?q=%s',
+			$msg->user,
+			$query
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
 	function pastebin( &$irc, &$data ) {
 		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
 			return;
@@ -490,6 +507,21 @@ class DocBot {
 		$message = sprintf(
 			'%s: "Pages" in WordPress are innocuous. There are the proper terms for each:  WordPress pages (those are made in the dashboard under add new page) Site Pages (those are whatever exists on the front end of your site but have no WordPress Page such as archive pages, the 404, etc.) and Page Templates (php files you can apply to a WordPress page)',
 			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function md5( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		$message = sprintf(
+			'%s: %s',
+			$msg->user,
+			md5( $msg->message )
 		);
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

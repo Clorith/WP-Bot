@@ -259,7 +259,6 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)css\b', $doc_bot, 'c
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)html\b', $doc_bot, 'html' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)javascript\b', $doc_bot, 'javascript' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)php\b', $doc_bot, 'php' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)rtfm\b', $doc_bot, 'rtfm' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bot, 'possible' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );

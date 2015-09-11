@@ -467,20 +467,6 @@ class DocBot {
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
 
-	function rtfm( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
-		$msg = $this->message_split( $irc, $data );
-
-		$message = sprintf(
-			'%s: Please read the information in the link(s) that have been given to you :)',
-			$msg->user
-		);
-
-		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-	}
-
 	function possible( &$irc, &$data ) {
 		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
 			return;
@@ -551,6 +537,4 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
-
-	//numnumnum
 }

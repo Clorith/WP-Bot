@@ -20,9 +20,7 @@ class DocBot {
 		$message_parse = explode( '>', $message_parse );
 		if ( isset( $message_parse[1] ) && ! empty( $message_parse[1] ) ) {
 			$send_to = trim( $message_parse[1] );
-			if ( $irc->isJoined( $data->channel, $send_to ) ) {
-				$user = $send_to;
-			}
+			$user = $send_to;
 		}
 		$message = trim( $message_parse[0] );
 
@@ -41,7 +39,6 @@ class DocBot {
 		$search = str_replace( '%s', $string , $search );
 
 		$headers = get_headers( $search, true );
-
 		return $headers['Location'][1];
 	}
 

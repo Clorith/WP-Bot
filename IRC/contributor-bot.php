@@ -226,7 +226,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' 
 $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
 $irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
-$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/./', $bot, 'log_join' );
+$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $bot, 'log_join' );
 
 /**
  * Generic commands associated purely with ContriBot
@@ -240,6 +240,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?\b', $do
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?\b', $doc_bot, 'codex' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?\b', $doc_bot, 'plugin' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?\b', $doc_bot, 'google' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)l(mgtfy)?\b', $doc_bot, 'lmgtfy' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(code|paste|pastebin)\b', $doc_bot, 'pastebin' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)first\b', $doc_bot, 'do_the_first' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $doc_bot, 'language' );
@@ -252,6 +253,18 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(_|underscores)\b', 
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)777\b', $doc_bot, 'lucky_seven' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ftp\b', $doc_bot, 'ftp' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)hacked\b', $doc_bot, 'hacked' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)next\b', $doc_bot, 'next' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)related\b', $doc_bot, 'related' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)css\b', $doc_bot, 'css' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)html\b', $doc_bot, 'html' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)javascript\b', $doc_bot, 'javascript' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)php\b', $doc_bot, 'php' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)rtfm\b', $doc_bot, 'rtfm' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bot, 'possible' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
+
 
 /**
  * Start the connection to an IRC server

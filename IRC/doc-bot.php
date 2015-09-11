@@ -537,4 +537,46 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function trac_ticket( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		preg_match_all( '/#([0-9]+?)\b/si', $msg->message, $tickets );
+
+		foreach( $tickets[1] AS $ticket ) {
+			$url = sprintf( 'https://core.trac.wordpress.org/ticket/%d', $ticket );
+
+			$message = sprintf(
+				'%s: %s',
+				$msg->user,
+				$url
+			);
+
+			$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+		}
+	}
+
+	function trac_changeset( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+
+		preg_match_all( '/r([0-9]+?)\b/si', $msg->message, $changes );
+
+		foreach( $changes[1] AS $change ) {
+			$url = sprintf( 'https://core.trac.wordpress.org/changeset/%d', $change );
+
+			$message = sprintf(
+				'%s: %s',
+				$msg->user,
+				$url
+			);
+
+			$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+		}
+	}
 }

@@ -6,14 +6,49 @@
  * Replace some frequently used doc-bot commands if the bot is
  * missing from the channel for whatever reason
  */
-class DocBot {
+class DocBot extends bot {
+
+	function __construct() {
+		parent::__construct();
+	}
+
+    /**
+     * Returns human-readable string for the difference between two dates
+     *
+     * @param string $start
+     * @param string $end
+     * @return string
+     * @access public
+     */
+	function diffdate( $start, $end = false ) {
+		if ( ! $end ) $end = date( 'Y-m-d H:i:s' );
+		$datediff = strtotime( $start ) - strtotime( $end );
+		$ago = array( 'years' => floor( $datediff / ( 365 * 60 * 60 * 24 ) ) );
+		$ago['months'] 	= floor( ( $datediff - $ago['years'] * 365 * 60 * 60 * 24 ) / ( 30 * 60 * 60 * 24 ) );
+		$ago['days']	= floor( $datediff / 86400 );
+		$ago['hours']	= floor( ( $datediff - ( $ago['days'] * 86400 ) ) / 3600 );
+		$ago['minutes']	= floor( ( $datediff - ( $ago['days'] * 86400 ) - ( $ago['hours'] * 3600 ) ) / 60 );
+		$ago['seconds']	= floor( ( $datediff - ( $ago['days'] * 86400 ) - ( $ago['hours'] * 3600 ) - ( $ago['minutes'] * 60 ) ) );
+
+		// Build date diff string with date units that have values only
+		$agostr = array();
+		foreach ( $ago as $unit => $val ) {
+			if ( $val > 0 ) $agostr[] = $val . ' ' . $unit;
+		}
+		$agostr = implode( ', ', $agostr ) . ' ago';
+		$agostr = substr_replace( $agostr, ' and ', strrpos( $agostr, ', ' ), strlen( ', ' ) );
+
+		return $agostr;
+	}
+
 	function is_doc_bot( &$irc, $channel ) {
 		return $irc->isJoined( $channel, 'doc-bot' );
 	}
+
 	function message_split( &$irc, $data ) {
 		$message_parse = explode( ' ', $data->message, 2 );
 		$command = $message_parse[0];
-		$message_parse = $message_parse[1];
+		$message_parse = @$message_parse[1];
 
 		$user = $data->nick;
 
@@ -34,11 +69,12 @@ class DocBot {
 
 		return $result;
 	}
+
 	function google_result( $string ) {
 		$search = 'http://www.google.com/search?q=%s&btnI';
 
 		$string = urlencode( $string );
-		$search = str_replace( '%s', $string , $search );
+		$search = str_replace( '%s', $string, $search );
 
 		$headers = get_headers( $search, true );
 
@@ -470,20 +506,6 @@ class DocBot {
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
 
-	function rtfm( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
-		$msg = $this->message_split( $irc, $data );
-
-		$message = sprintf(
-			'%s: Please read the information in the link(s) that have been given to you :)',
-			$msg->user
-		);
-
-		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-	}
-
 	function possible( &$irc, &$data ) {
 		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
 			return;
@@ -550,6 +572,61 @@ class DocBot {
 		$message = sprintf(
 			'%s: http://codex.wordpress.org/images/b/b3/donthack.jpg',
 			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function seen( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+		$seenstr = '';
+
+		// Check if the user is being silly
+		if ( $msg->message == $msg->user ) $seenstr = "That's you... hilarious...";
+
+		// Check if the user is currently in the channel
+		if ( empty( $seenstr) && is_array( $irc->channel ) ) {
+			foreach ( $irc->channel as $channel => $channel_obj ) {
+				if ( ! empty( $channel_obj->users ) ) {
+					foreach ( $channel_obj->users as $user => $user_obj ) {
+						if ( $msg->message == $user ) $seenstr = $msg->message . ' is currently in ' . $channel;
+					}
+				}
+			}
+		}
+
+		// Select the last row in the messages for the queried user[]
+		if ( empty( $seenstr ) ) {
+			$this->pdo_ping();
+			try {
+				$statement = $this->db->prepare( "SELECT * FROM messages WHERE nickname = :nickname AND event IN ('quit', 'part', 'nickchange') ORDER BY id DESC LIMIT 1" );
+				$statement->execute( array( ':nickname' => $msg->message ) );
+				$seen = $statement->fetch( PDO::FETCH_OBJ );
+
+				// Process result and set seen string
+				if ( is_object( $seen ) ) {
+					$seenstr = $msg->message . ' was last seen ' . $this->diffdate( $seen->time );
+					if ( $seen->event == 'nickchange' ) {
+						$seenstr .= ' changing their nick to ' . $seen->message;
+					} else {
+						$seenstr .= ' ' . $seen->event . 'ing ' . $seen->channel . ' with ' . ( empty( $seen->message ) ? 'no ' . $seen->event . ' message' : 'the message: ' . $seen->message );
+					}
+				}
+
+			} catch ( PDOException $e ) {
+				echo 'PDO Exception: ' . $e->getMessage();
+			}
+			if ( empty( $seenstr ) ) $seenstr = "I've never seen {$msg->message} before.";
+		}
+
+		// Send seen result
+		$message = sprintf(
+			'%s: %s',
+			$msg->user,
+			$seenstr
 		);
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

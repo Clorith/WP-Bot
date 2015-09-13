@@ -17,7 +17,7 @@ require_once( ABSPATH . '/doc-bot.php' );
  */
 class bot {
 	private $appreciation = array();
-	private $db;
+	public $db;
 
 	/**
 	 * The class construct prepares our functions and database connections
@@ -43,7 +43,7 @@ class bot {
 			PDO::ATTR_PERSISTENT => true,
 			PDO::ATTR_ERRMODE    => PDO::ERRMODE_EXCEPTION
 		);
-		$this->db   = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, $attributes );
+		$this->db = new PDO( 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASS, $attributes );
 	}
 
 	function pdo_ping() {
@@ -196,6 +196,10 @@ class bot {
 		$this->log_event( 'join', $irc, $data );
 	}
 
+	function log_nickchange( &$irc, &$data ) {
+		$this->log_event( 'nickchange', $irc, $data );
+	}
+
 	function help_cmd( &$irc, &$data ) {
 		$message = sprintf( 'For ContriBot Help, see %s',
 			HELP_URL
@@ -223,10 +227,11 @@ $irc->setChannelSyncing( true ); // Channel sync allows us to get user details w
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'channel_query' );
 $irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' );
-$irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
-$irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
-$irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
+$irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/(.*)/', $bot, 'log_kick' );
+$irc->registerActionHandler( SMARTIRC_TYPE_PART, '/(.*)/', $bot, 'log_part' );
+$irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/(.*)/', $bot, 'log_quit' );
 $irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $bot, 'log_join' );
+$irc->registerActionHandler( SMARTIRC_TYPE_NICKCHANGE, '/(.*)/', $bot, 'log_nickchange' );
 
 /**
  * Generic commands associated purely with ContriBot
@@ -259,11 +264,11 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)css\b', $doc_bot, 'c
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)html\b', $doc_bot, 'html' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)javascript\b', $doc_bot, 'javascript' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)php\b', $doc_bot, 'php' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)rtfm\b', $doc_bot, 'rtfm' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bot, 'possible' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)seen\b', $doc_bot, 'seen' );
 
 
 /**

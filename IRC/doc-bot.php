@@ -22,7 +22,7 @@ class DocBot extends bot {
      */
 	function diffdate( $start, $end = false ) {
 		if ( ! $end ) $end = date( 'Y-m-d H:i:s' );
-		$datediff = strtotime( $start ) - strtotime( $end );
+		$datediff = strtotime( $end ) - strtotime( $start );
 		$ago = array( 'years' => floor( $datediff / ( 365 * 60 * 60 * 24 ) ) );
 		$ago['months'] 	= floor( ( $datediff - $ago['years'] * 365 * 60 * 60 * 24 ) / ( 30 * 60 * 60 * 24 ) );
 		$ago['days']	= floor( $datediff / 86400 );

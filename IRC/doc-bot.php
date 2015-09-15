@@ -12,7 +12,7 @@ class DocBot extends bot {
 		parent::__construct();
 	}
 
-    /**
+	/**
      * Returns human-readable string for the difference between two dates
      *
      * @param string $start
@@ -68,6 +68,74 @@ class DocBot extends bot {
 		);
 
 		return $result;
+	}
+
+	function in_channel( $username, &$irc ) {
+		if ( is_array( $irc->channel ) ) {
+			foreach ( $irc->channel as $channel => $channel_obj ) {
+				if ( ! empty( $channel_obj->users ) ) {
+					foreach ( $channel_obj->users as $user => $user_obj ) {
+						if ( $username == $user ) return $channel;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	function joined( &$irc, &$data ) {
+		$this->check_messages( $irc, $data );
+	}
+
+	function nickchange( &$irc, &$data ) {
+		$this->check_messages( $irc, $data, $data->message );
+	}
+
+	// Function to check and deliver messages for a nick (messages issued from .tell command)
+	function check_messages( &$irc, &$data, $nick = false ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		if ( ! $nick ) $nick = $data->nick;
+		$channel = $data->channel;
+
+		// Query the messages for any mail events (from .tell command)
+		$this->pdo_ping();
+		try {
+			$statement = $this->db->prepare( "SELECT * FROM messages WHERE nickname = :nickname AND event = 'mail'" );
+			$statement->execute( array( ':nickname' => $nick ) );
+			$tells = $statement->fetchAll( PDO::FETCH_OBJ );
+
+			// Process result and set seen string
+			if ( ! empty( $tells ) ) {
+				if ( empty( $channel ) ) $channel = $tells[0]->channel;
+				// Deliver the messages
+				foreach ( $tells as $tell ) {
+					$irc->message( SMARTIRC_TYPE_CHANNEL, $nick, '[' . date( 'Y-m-d H:i:s' ) . '] ' . $tell->nickname . ': ' . $tell->message );
+				}
+
+				// Delete the messages we just delivered
+				try {
+					$delete = $this->db->prepare( "DELETE FROM messages WHERE nickname = :nickname AND event = 'mail'" );
+					$delete = $delete->execute( array( ':nickname' => $nick ) );
+				} catch ( PDOException $e ) {
+					echo 'PDO Exception: ' . $e->getMessage();
+				}
+
+				// Set the chat message on join
+				$message = sprintf(
+					'%s: %s',
+					$nick,
+					'You received ' . count( $tells ) . ' message' . ( count( $tells ) > 1 ? 's' : '' ) . ' while you were away'
+				);
+			}
+		} catch ( PDOException $e ) {
+			echo 'PDO Exception: ' . $e->getMessage();
+		}
+
+		if ( ! empty( $message ) ) {
+			$irc->message( SMARTIRC_TYPE_CHANNEL, $channel, $message );
+		}
 	}
 
 	function google_result( $string ) {
@@ -520,20 +588,6 @@ class DocBot extends bot {
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
 
-	function pages( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
-		$msg = $this->message_split( $irc, $data );
-
-		$message = sprintf(
-			'%s: "Pages" in WordPress are innocuous. There are the proper terms for each:  WordPress pages (those are made in the dashboard under add new page) Site Pages (those are whatever exists on the front end of your site but have no WordPress Page such as archive pages, the 404, etc.) and Page Templates (php files you can apply to a WordPress page)',
-			$msg->user
-		);
-
-		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-	}
-
 	function md5( &$irc, &$data ) {
 		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
 			return;
@@ -588,17 +642,12 @@ class DocBot extends bot {
 		if ( $msg->message == $msg->user ) $seenstr = "That's you... hilarious...";
 
 		// Check if the user is currently in the channel
-		if ( empty( $seenstr) && is_array( $irc->channel ) ) {
-			foreach ( $irc->channel as $channel => $channel_obj ) {
-				if ( ! empty( $channel_obj->users ) ) {
-					foreach ( $channel_obj->users as $user => $user_obj ) {
-						if ( $msg->message == $user ) $seenstr = $msg->message . ' is currently in ' . $channel;
-					}
-				}
-			}
+		if ( empty( $seenstr) ) {
+			$channel = $this->in_channel( $msg->message, $irc );
+			if ( $channel ) $seenstr = $msg->message . ' is currently in ' . $channel;
 		}
 
-		// Select the last row in the messages for the queried user[]
+		// Select the last row in the messages for the queried user
 		if ( empty( $seenstr ) ) {
 			$this->pdo_ping();
 			try {
@@ -627,6 +676,61 @@ class DocBot extends bot {
 			'%s: %s',
 			$msg->user,
 			$seenstr
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function tell( &$irc, &$data ) {
+		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
+			return;
+		}
+		$msg = $this->message_split( $irc, $data );
+		$message = '';
+
+		$tell = explode( ' ', $msg->message, 2 );
+		if ( count( $tell ) >= 2 ) {
+			$nick = $tell[0];
+			$message = $tell[1];
+			$in_channel = $this->in_channel( $nick, $irc );
+			if ( $nick == $msg->user ) {
+				$message = "That's you... hilarious...";
+			} else if ( $in_channel ) {
+				$message = $nick . ' is currently in ' . $in_channel . ' - how about you tell them yourself?';
+			} else {
+				// Check for previously queued messages
+				$this->pdo_ping();
+				try {
+					$statement = $this->db->prepare( "SELECT * FROM messages WHERE nickname = :nickname AND event = 'mail'" );
+					$statement->execute( array( ':nickname' => $nick ) );
+					$tells = $statement->fetchAll( PDO::FETCH_OBJ );
+
+					// Process result and set seen string
+					if ( is_array( $tells ) && count( $tells ) >= 5 ) {
+						$message = "There are too many messages in queue for $nick";
+					} else {
+						$newdata = new stdClass;
+						$newdata->nick = $nick;
+						$newdata->ident = $data->ident;
+						$newdata->host = $data->host;
+						$newdata->channel = $data->channel;
+						$newdata->message = $message;
+						$this->log_event( 'mail', $irc, $newdata );
+						$message = "Your message has been queued for $nick";
+					}
+				} catch ( PDOException $e ) {
+					echo 'PDO Exception: ' . $e->getMessage();
+				}
+			}
+		} else {
+			$message = "I cannot deliver a blank message";
+		}
+
+		// Send seen result
+		$message = sprintf(
+			'%s: %s',
+			$msg->user,
+			$message
 		);
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

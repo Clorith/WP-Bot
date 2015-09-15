@@ -198,6 +198,27 @@ class bot {
 
 	function log_nickchange( &$irc, &$data ) {
 		$this->log_event( 'nickchange', $irc, $data );
+		$this->remove_nicks( $data->nick, $irc );
+	}
+
+	// This function removes nicks from the SmartIRC channel objects (patches the problem with nick changes bugging the nick list)
+	function remove_nicks( $nicks, &$irc ) {
+		if ( is_array( $irc->channel ) ) {
+			foreach ( $irc->channel as $channel => $channel_obj ) {
+				if ( ! empty( $channel_obj->users ) ) {
+					foreach ( $channel_obj->users as $user => $user_obj ) {
+						if ( ! is_array( $nicks ) && ! empty( $nicks ) ) $nicks = array( $nicks );
+						if ( is_array( $nicks ) ) {
+							foreach ( $nicks as $nick ) {
+								if ( $nick == $user ) {
+									unset( $irc->channel[ $channel ]->users[ $user ] );
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	function help_cmd( &$irc, &$data ) {
@@ -241,6 +262,8 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)h(elp)?\b', $bot, 'h
 /**
  * DocBot class hooks
  */
+$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $doc_bot, 'joined' );
+$irc->registerActionHandler( SMARTIRC_TYPE_NICKCHANGE, '/(.*)/', $doc_bot, 'nickchange' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?\b', $doc_bot, 'developer' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?\b', $doc_bot, 'codex' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?\b', $doc_bot, 'plugin' );
@@ -265,11 +288,10 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)html\b', $doc_bot, '
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)javascript\b', $doc_bot, 'javascript' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)php\b', $doc_bot, 'php' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bot, 'possible' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)seen\b', $doc_bot, 'seen' );
-
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(tell|mail)\b', $doc_bot, 'tell' );
 
 /**
  * Start the connection to an IRC server

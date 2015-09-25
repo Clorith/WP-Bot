@@ -7,9 +7,6 @@
  * missing from the channel for whatever reason
  */
 class DocBot {
-	function is_doc_bot( &$irc, $channel ) {
-		return $irc->isJoined( $channel, 'doc-bot' );
-	}
 	function message_split( &$irc, $data ) {
 		$message_parse = explode( ' ', $data->message, 2 );
 		$command = $message_parse[0];
@@ -43,9 +40,6 @@ class DocBot {
 	}
 
 	function developer( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 		$string = trim( $msg->message );
 
@@ -102,9 +96,6 @@ class DocBot {
 	}
 
 	function codex( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$google = $this->google_result( $msg->message . ' site:codex.wordpress.org' );
@@ -123,9 +114,6 @@ class DocBot {
 	}
 
 	function plugin( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$url    = 'https://wordpress.org/plugins/' . str_replace( ' ', '-', $msg->message );
@@ -178,9 +166,6 @@ class DocBot {
 	}
 
 	function google( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$google = $this->google_result( $msg->message );
@@ -196,9 +181,6 @@ class DocBot {
 	}
 
 	function lmgtfy( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$query = urlencode( $msg->message );
@@ -213,9 +195,6 @@ class DocBot {
 	}
 
 	function pastebin( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -228,9 +207,6 @@ class DocBot {
 	}
 
 	function do_the_first( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irtc, $data );
 
 		$message = sprintf(
@@ -242,9 +218,6 @@ class DocBot {
 	}
 
 	function language( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -257,9 +230,6 @@ class DocBot {
 	}
 
 	function moving( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -271,9 +241,6 @@ class DocBot {
 	}
 
 	function inspector( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -285,9 +252,6 @@ class DocBot {
 	}
 
 	function wordpresscom( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -299,9 +263,6 @@ class DocBot {
 	}
 
 	function make_blog( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -313,10 +274,6 @@ class DocBot {
 	}
 
 	function count( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
-
 		$counter = file_get_contents( 'https://wordpress.org/download/counter/?ajaxupdate=1' );
 
 		$message = sprintf(
@@ -328,9 +285,6 @@ class DocBot {
 	}
 
 	function underscores( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -342,9 +296,6 @@ class DocBot {
 	}
 
 	function lucky_seven( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -356,9 +307,6 @@ class DocBot {
 	}
 
 	function ftp( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -370,9 +318,6 @@ class DocBot {
 	}
 
 	function hacked( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -384,9 +329,6 @@ class DocBot {
 	}
 
 	function next( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -398,9 +340,6 @@ class DocBot {
 	}
 
 	function related( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -412,9 +351,6 @@ class DocBot {
 	}
 
 	function css( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -426,9 +362,6 @@ class DocBot {
 	}
 
 	function html( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -440,9 +373,6 @@ class DocBot {
 	}
 
 	function javascript( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -454,9 +384,6 @@ class DocBot {
 	}
 
 	function php( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -468,9 +395,6 @@ class DocBot {
 	}
 
 	function possible( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -482,9 +406,6 @@ class DocBot {
 	}
 
 	function pages( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -496,9 +417,6 @@ class DocBot {
 	}
 
 	function md5( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -511,9 +429,6 @@ class DocBot {
 	}
 
 	function ask( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -525,9 +440,6 @@ class DocBot {
 	}
 
 	function donthack( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		$message = sprintf(
@@ -539,9 +451,6 @@ class DocBot {
 	}
 
 	function trac_ticket( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		preg_match_all( '/#([0-9]+?)\b/si', $msg->message, $tickets );
@@ -560,9 +469,6 @@ class DocBot {
 	}
 
 	function trac_changeset( &$irc, &$data ) {
-		if ( $this->is_doc_bot( $irc, $data->channel ) ) {
-			return;
-		}
 		$msg = $this->message_split( $irc, $data );
 
 		preg_match_all( '/r([0-9]+?)\b/si', $msg->message, $changes );

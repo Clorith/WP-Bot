@@ -263,6 +263,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bo
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)vuln\b', $doc_bot, 'wpvulndb' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\b#[0-9]+?\b', $doc_bot, 'trac_ticket' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $doc_bot, 'trac_changeset' );
 

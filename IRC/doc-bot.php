@@ -7,7 +7,12 @@
  * missing from the channel for whatever reason
  */
 class DocBot {
-	function message_split( &$irc, $data ) {
+
+	function __construct() {
+
+	}
+
+	function message_split( $data ) {
 		$message_parse = explode( ' ', $data->message, 2 );
 		$command = $message_parse[0];
 		$message_parse = $message_parse[1];
@@ -40,7 +45,7 @@ class DocBot {
 	}
 
 	function developer( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 		$string = trim( $msg->message );
 
 		$search = 'https://developer.wordpress.org/?s=%s';
@@ -96,7 +101,7 @@ class DocBot {
 	}
 
 	function codex( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$google = $this->google_result( $msg->message . ' site:codex.wordpress.org' );
 
@@ -114,7 +119,7 @@ class DocBot {
 	}
 
 	function plugin( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$url    = 'https://wordpress.org/plugins/' . str_replace( ' ', '-', $msg->message );
 		$search = 'https://wordpress.org/plugins/search.php?q=';
@@ -166,7 +171,7 @@ class DocBot {
 	}
 
 	function google( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$google = $this->google_result( $msg->message );
 
@@ -181,7 +186,7 @@ class DocBot {
 	}
 
 	function lmgtfy( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$query = urlencode( $msg->message );
 
@@ -195,7 +200,7 @@ class DocBot {
 	}
 
 	function pastebin( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please post your source code with a service like %s or similar for us to look at, and avoid pasting large pieces of code to the channel.',
@@ -207,7 +212,7 @@ class DocBot {
 	}
 
 	function do_the_first( &$irc, &$data ) {
-		$msg = $this->message_split( $irtc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please attempt to disable all plugins, and use one of the default (Twenty*) themes. If the problem goes away, enable them one by one to identify the source of your troubles.',
@@ -218,7 +223,7 @@ class DocBot {
 	}
 
 	function language( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please help us keep %s a family friendly room, and avoid using foul language.',
@@ -230,7 +235,7 @@ class DocBot {
 	}
 
 	function moving( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: If you rename the WordPress directory on your server, switch ports or change the hostname http://codex.wordpress.org/Moving_WordPress applies',
@@ -241,7 +246,7 @@ class DocBot {
 	}
 
 	function inspector( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please use the built-in Developer Tools of your browser to fix problems with your website. Right click your page and pick “Inspect Element” (Cr, FF, Op) or press F12-button (IE) to track down CSS problems. Use the console to see JavaScript bugs.',
@@ -252,7 +257,7 @@ class DocBot {
 	}
 
 	function wordpresscom( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: For support with your blog or site hosted on WordPress.com, please see http://en.support.wordpress.com/contact/',
@@ -263,7 +268,7 @@ class DocBot {
 	}
 
 	function make_blog( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: To get started contributing to WordPress, have a look at the Make Blogs over at https://make.wordpress.org',
@@ -285,7 +290,7 @@ class DocBot {
 	}
 
 	function underscores( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Check out http://underscores.me/ - Underscores is a starter theme meant to be the base of your next awesome theme, try it out!',
@@ -296,7 +301,7 @@ class DocBot {
 	}
 
 	function lucky_seven( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Setting file permissions to 777 is inherently insecure, please read http://codex.wordpress.org/Changing_File_Permissions',
@@ -307,7 +312,7 @@ class DocBot {
 	}
 
 	function ftp( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s:  If WordPress keeps asking you for FTP credentials see http://codex.wordpress.org/Updating_WordPress#Automatic_Update and http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants as well as http://s.sivel.net/wpfsmethod for more information about the file system method selection and http://v007.me/4 for forcing direct file system writes',
@@ -318,7 +323,7 @@ class DocBot {
 	}
 
 	function hacked( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: http://codex.wordpress.org/FAQ_My_site_was_hacked , and stop trying to patch up your hacked site. Reinstall or restore your backups. And read http://codex.wordpress.org/Hardening_WordPress',
@@ -329,7 +334,7 @@ class DocBot {
 	}
 
 	function next( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Another happy customer leaves the building :)',
@@ -340,7 +345,7 @@ class DocBot {
 	}
 
 	function related( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: It\'s not a WordPress question just because the user uses WordPress',
@@ -351,7 +356,7 @@ class DocBot {
 	}
 
 	function css( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please /join #css for questions about CSS',
@@ -362,7 +367,7 @@ class DocBot {
 	}
 
 	function html( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please /join #html for questions about HTML',
@@ -373,7 +378,7 @@ class DocBot {
 	}
 
 	function javascript( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please /join #javascript for questions about javascript',
@@ -384,7 +389,7 @@ class DocBot {
 	}
 
 	function php( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Please /join ##php for questions about PHP',
@@ -395,7 +400,7 @@ class DocBot {
 	}
 
 	function possible( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Everything is "possible" - If you have questions about how to do something specific, then feel free to ask',
@@ -406,7 +411,7 @@ class DocBot {
 	}
 
 	function pages( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: "Pages" in WordPress are innocuous. There are the proper terms for each:  WordPress pages (those are made in the dashboard under add new page) Site Pages (those are whatever exists on the front end of your site but have no WordPress Page such as archive pages, the 404, etc.) and Page Templates (php files you can apply to a WordPress page)',
@@ -417,7 +422,7 @@ class DocBot {
 	}
 
 	function md5( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: %s',
@@ -429,7 +434,7 @@ class DocBot {
 	}
 
 	function ask( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: Don\'t ask to ask, just ask :)',
@@ -440,7 +445,7 @@ class DocBot {
 	}
 
 	function donthack( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		$message = sprintf(
 			'%s: http://codex.wordpress.org/images/b/b3/donthack.jpg',
@@ -451,7 +456,7 @@ class DocBot {
 	}
 
 	function trac_ticket( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		preg_match_all( '/#([0-9]+?)\b/si', $msg->message, $tickets );
 
@@ -469,7 +474,7 @@ class DocBot {
 	}
 
 	function trac_changeset( &$irc, &$data ) {
-		$msg = $this->message_split( $irc, $data );
+		$msg = $this->message_split( $data );
 
 		preg_match_all( '/r([0-9]+?)\b/si', $msg->message, $changes );
 

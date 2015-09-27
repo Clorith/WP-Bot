@@ -7,6 +7,7 @@
  * missing from the channel for whatever reason
  */
 class DocBot {
+	private $plugin_details = array();
 
 	function __construct() {
 
@@ -120,51 +121,59 @@ class DocBot {
 
 	function plugin( &$irc, &$data ) {
 		$msg = $this->message_split( $data );
-
-		$url    = 'https://wordpress.org/plugins/' . str_replace( ' ', '-', $msg->message );
-		$search = 'https://wordpress.org/plugins/search.php?q=';
-
-		if ( preg_match( "/-l\b/i", $msg->message ) ) {
-			$msg->message = trim( str_replace( '-l', '', $msg->message ) );
-			$message = sprintf(
-				'%s: See a list of plugins relating to %s at %s',
-				$msg->user,
-				$msg->message,
-				$search . str_replace( ' ', '+', $msg->message )
-			);
-
-			$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-			return;
-		}
-
-		$first_pass = get_headers( $url, true );
-
-		if ( isset( $first_pass['Status'] ) && ! stristr( $first_pass['Status'], '404 Not Found' ) ) {
-			$message = sprintf(
-				'%s: %s',
-				$msg->user,
-				$url
-			);
-			$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-			return;
-		}
-
-		$page = file_get_contents( $search . str_replace( ' ', '+', $msg->message ) );
-		preg_match_all( "/plugin-card-top.+?column-name.+?<a.+?href=\"(.+?)\">(.+?)</msi", $page, $matches );
-
-		if ( ! empty( $matches[1] ) ) {
-			$message = sprintf(
-				'%s: %s - %s',
-				$msg->user,
-				$matches[2][0],
-				$matches[1][0]
-			);
+		if ( isset( $this->plugin_details[ $msg->message ] ) ) {
+			$message = $this->plugin_details[ $msg->message ];
 		}
 		else {
-			$message = sprintf(
-				'%s: No results found',
-				$msg->user
-			);
+
+			$url    = 'https://wordpress.org/plugins/' . str_replace( ' ', '-', $msg->message );
+			$search = 'https://wordpress.org/plugins/search.php?q=';
+
+			if ( preg_match( "/-l\b/i", $msg->message ) ) {
+				$msg->message = trim( str_replace( '-l', '', $msg->message ) );
+				$message      = sprintf(
+					'%s: See a list of plugins relating to %s at %s',
+					$msg->user,
+					$msg->message,
+					$search . str_replace( ' ', '+', $msg->message )
+				);
+
+				$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+
+				return;
+			}
+
+			$first_pass = get_headers( $url, true );
+
+			if ( isset( $first_pass['Status'] ) && ! stristr( $first_pass['Status'], '404 Not Found' ) ) {
+				$message = sprintf(
+					'%s: %s',
+					$msg->user,
+					$url
+				);
+				$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+
+				return;
+			}
+
+			$page = file_get_contents( $search . str_replace( ' ', '+', $msg->message ) );
+			preg_match_all( "/plugin-card-top.+?column-name.+?<a.+?href=\"(.+?)\">(.+?)</msi", $page, $matches );
+
+			if ( ! empty( $matches[1] ) ) {
+				$message = sprintf(
+					'%s: %s - %s',
+					$msg->user,
+					$matches[2][0],
+					$matches[1][0]
+				);
+			} else {
+				$message = sprintf(
+					'%s: No results found',
+					$msg->user
+				);
+			}
+
+			$this->plugin_details[ $msg->message ] = $message;
 		}
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

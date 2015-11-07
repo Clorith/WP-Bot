@@ -32,14 +32,14 @@ CREATE TABLE IF NOT EXISTS `stats_30d` (
   UNIQUE KEY `nickname` (`nickname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE IF NOT EXISTS `simple_responses` (
+CREATE TABLE IF NOT EXISTS `predefined_messages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `enabled` int(1) NOT NULL DEFAULT '1',
   `command` varchar(255) NOT NULL,
-  `aliases` TEXT,
-  `text` TEXT NOT NULL,
+  `response` text NOT NULL,
+  `enabled` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
 
 CREATE TABLE IF NOT EXISTS `privileged` (
   `user` varchar(255) NOT NULL,

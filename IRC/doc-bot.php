@@ -118,23 +118,32 @@ class DocBot {
 	function plugin( &$irc, &$data ) {
 		$msg = $this->message_split( $data );
 		if ( isset( $this->plugin_details[ $msg->message ] ) ) {
-			$message = $this->plugin_details[ $msg->message ];
+			$message = sprintf(
+				'%s: %s',
+				$msg->user,
+				$this->plugin_details[ $msg->message ]
+			);
 		}
 		else {
-
 			$url    = 'https://wordpress.org/plugins/' . str_replace( ' ', '-', $msg->message );
 			$search = 'https://wordpress.org/plugins/search.php?q=';
 
 			if ( preg_match( "/-l\b/i", $msg->message ) ) {
 				$msg->message = trim( str_replace( '-l', '', $msg->message ) );
-				$message      = sprintf(
-					'%s: See a list of plugins relating to %s at %s',
-					$msg->user,
+				$cache = sprintf(
+					'See a list of plugins relating to %s at %s',
 					$msg->message,
 					$search . str_replace( ' ', '+', $msg->message )
 				);
+				$message      = sprintf(
+					'%s: %s',
+					$msg->user,
+					$cache
+				);
 
 				$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+
+				$this->plugin_details[ $msg->message ] = $cache;
 
 				return;
 			}
@@ -149,6 +158,8 @@ class DocBot {
 				);
 				$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 
+				$this->plugin_details[ $msg->message ] = $url;
+
 				return;
 			}
 
@@ -156,20 +167,25 @@ class DocBot {
 			preg_match_all( "/plugin-card-top.+?column-name.+?<a.+?href=\"(.+?)\">(.+?)</msi", $page, $matches );
 
 			if ( ! empty( $matches[1] ) ) {
-				$message = sprintf(
-					'%s: %s - %s',
-					$msg->user,
+				$cache = sprintf(
+					'%s - %s',
 					$matches[2][0],
 					$matches[1][0]
 				);
+
+				$message = sprintf(
+					'%s: %s',
+					$msg->user,
+						$cache
+				);
+
+				$this->plugin_details[ $msg->message ] = $cache;
 			} else {
 				$message = sprintf(
 					'%s: No results found',
 					$msg->user
 				);
 			}
-
-			$this->plugin_details[ $msg->message ] = $message;
 		}
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );

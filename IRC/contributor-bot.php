@@ -317,6 +317,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $doc_bo
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $doc_bot, 'count' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)vuln\b', $doc_bot, 'wpvulndb' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)scan\b', $doc_bot, 'sucuri_scan' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\b#[0-9]+?\b', $doc_bot, 'trac_ticket' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $doc_bot, 'trac_changeset' );
 

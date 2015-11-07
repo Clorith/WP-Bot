@@ -336,4 +336,83 @@ class DocBot {
 
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
+
+	function sucuri_scan( &$irc, &$data ) {
+		$msg = $this->message_split( $data );
+		$site = 'https://sitecheck.sucuri.net/';
+
+		$params = array(
+				'scan'   => $msg->message,
+				'clear'  => 1,
+				'json'   => 1
+		);
+
+		$curl = curl_init();
+
+		curl_setopt_array( $curl, array(
+				CURLOPT_URL            => sprintf( '%s?%s', $site, http_build_query( $params ) ),
+				CURLOPT_RETURNTRANSFER => 1,
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_MAXREDIRS      => 10,
+				CURLOPT_TIMEOUT        => 30,
+				CURLOPT_CUSTOMREQUEST  => 'GET',
+				CURLOPT_SSL_VERIFYHOST => 0,
+				CURLOPT_SSL_VERIFYPEER => 0,
+				CURLOPT_USERAGENT      => 'IRC #WordPress - WPBot',
+		) );
+
+		$response = curl_exec( $curl );
+		$response = json_decode( $response );
+
+		$problems = array();
+
+		$scan           = $response->SCAN;
+		$system         = $response->SYSTEM;
+		$webapp         = $response->WEBAPP;
+		$recomendations = $response->RECOMMENDATIONS;
+		$blacklist      = $response->BLACKLIST;
+
+		if ( isset( $webapp->WARN ) ) {
+			foreach( $webapp->WARN AS $warn ) {
+				$problems[] = $warn;
+			}
+		}
+		foreach( $blacklist->INFO AS $bl ) {
+			if ( ! stristr( $bl[0], 'Domain clean' ) ) {
+				$problems[] = sprintf( '%s: %s', $bl[0], $bl[1] );
+			}
+		}
+
+		curl_close( $curl );
+
+		if ( empty( $problems ) ) {
+			$reply = 'No problems discovered on ' . $msg->message;
+		}
+		else {
+			if ( count( $problems ) > 2 ) {
+				$reply = sprintf(
+					'Multiple issues detected, please visit https://sitecheck.sucuri.net/results/%s for details',
+					$msg->message
+				);
+			}
+			else {
+				$reply = sprintf(
+					'Problems detected (%s)',
+					$msg->message
+				);
+
+				foreach( $problems AS $problem ) {
+					$reply .= ' - ' . $problem;
+				}
+			}
+		}
+
+		$message = sprintf(
+				'%s: %s',
+				$msg->user,
+				$reply
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
 }

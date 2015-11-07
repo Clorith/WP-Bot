@@ -17,6 +17,7 @@ require_once( ABSPATH . '/doc-bot.php' );
  */
 class bot {
 	private $appreciation = array();
+	public  $predefined_messages = array();
 	private $db;
 
 	/**
@@ -33,6 +34,7 @@ class bot {
 		 * This is done because we run a bit of regex over it to identify words for consistency
 		 */
 		$this->appreciation = str_replace( ',', '|', strtolower( APPRECIATION ) );
+		$this->prepare_predefined_messages();
 	}
 
 	function db_connector() {
@@ -156,6 +158,76 @@ class bot {
 		}
 	}
 
+	function prepare_predefined_messages() {
+		$this->predefined_messages = array();
+
+		$this->pdo_ping();
+
+		try {
+			$entries = $this->db->query( "
+				SELECT
+					command,
+					response
+				FROM
+					predefined_messages
+				WHERE
+					enabled = 1
+			" );
+
+			while ( $entry = $entries->fetchObject() ) {
+				$this->predefined_messages[] = array(
+					'pattern' => $entry->command,
+					'response' => $entry->response
+				);
+			}
+		} catch( PDOException $e ) {
+			echo 'PDO Exception: ' . $e->getMessage();
+		}
+	}
+
+	function message_split( $data ) {
+		$message_parse = explode( ' ', $data->message, 2 );
+		$command = $message_parse[0];
+		$message_parse = $message_parse[1];
+
+		$user = $data->nick;
+
+		$message_parse = explode( '>', $message_parse );
+		if ( isset( $message_parse[1] ) && ! empty( $message_parse[1] ) ) {
+			$send_to = trim( $message_parse[1] );
+			$user = $send_to;
+		}
+		$message = trim( $message_parse[0] );
+
+		$result = (object) array(
+				'user'    => $user,
+				'message' => $message,
+				'command' => $command
+		);
+
+		return $result;
+	}
+
+	function is_predefined_message( &$irc, &$data ) {
+		if ( $data->message[0] == '.' || $data->message[0] == '!' ) {
+			foreach ( $this->predefined_messages AS $predef ) {
+				if ( preg_match( sprintf( "/^(!|\.)%s\b/i", $predef['pattern'] ), $data->message ) ) {
+					$msg = $this->message_split( $data );
+
+					$message = sprintf(
+							'%s: %s',
+							$msg->user,
+							$predef['response']
+					);
+
+					$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+
+					return true;
+				}
+			}
+		}
+	}
+
 	function log_event( $event, &$irc, &$data ) {
 		$this->pdo_ping();
 
@@ -241,38 +313,24 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?\b', $doc_bo
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?\b', $doc_bot, 'plugin' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?\b', $doc_bot, 'google' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)l(mgtfy)?\b', $doc_bot, 'lmgtfy' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(code|paste|pastebin)\b', $doc_bot, 'pastebin' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)first\b', $doc_bot, 'do_the_first' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $doc_bot, 'language' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)moving\b', $doc_bot, 'moving' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(inspect|inspector)\b', $doc_bot, 'inspector' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)wordpress\.com\b', $doc_bot, 'wordpresscom' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)make(-blog)?\b', $doc_bot, 'make_blog' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $doc_bot, 'count' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)(_|underscores)\b', $doc_bot, 'underscores' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)777\b', $doc_bot, 'lucky_seven' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ftp\b', $doc_bot, 'ftp' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)hacked\b', $doc_bot, 'hacked' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)next\b', $doc_bot, 'next' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)related\b', $doc_bot, 'related' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)css\b', $doc_bot, 'css' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)html\b', $doc_bot, 'html' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)javascript\b', $doc_bot, 'javascript' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)php\b', $doc_bot, 'php' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)possible\b', $doc_bot, 'possible' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)pages\b', $doc_bot, 'pages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)ask\b', $doc_bot, 'ask' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)vuln\b', $doc_bot, 'wpvulndb' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\b#[0-9]+?\b', $doc_bot, 'trac_ticket' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $doc_bot, 'trac_changeset' );
+
+/**
+ * DocBot common replies
+ */
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'is_predefined_message' );
 
 
 /**
  * Start the connection to an IRC server
  */
 $irc->connect( IRC_NETWORK, IRC_PORT );
-$irc->login( BOTNICK, BOTNAME . ' - version ' . BOTVERSION );
+$irc->login( BOTNICK, BOTNAME . ' - version ' . BOTVERSION, 0, BOTNICK, BOTPASS );
 $irc->join( array( IRC_CHANNELS ) );
 $irc->listen();
 

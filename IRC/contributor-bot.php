@@ -15,10 +15,10 @@ require_once( ABSPATH . '/doc-bot.php' );
  *
  * Contains our custom IRC functions
  */
-class bot {
-	private $appreciation = array();
-	public  $predefined_messages = array();
-	private $db;
+class Bot {
+	public $appreciation = array();
+	public $tell         = array();
+	public $db;
 
 	/**
 	 * The class construct prepares our functions and database connections
@@ -34,7 +34,8 @@ class bot {
 		 * This is done because we run a bit of regex over it to identify words for consistency
 		 */
 		$this->appreciation = str_replace( ',', '|', strtolower( APPRECIATION ) );
-		$this->prepare_predefined_messages();
+
+		$this->prepare_tell_notifications();
 	}
 
 	function db_connector() {
@@ -158,37 +159,10 @@ class bot {
 		}
 	}
 
-	function prepare_predefined_messages() {
-		$this->predefined_messages = array();
-
-		$this->pdo_ping();
-
-		try {
-			$entries = $this->db->query( "
-				SELECT
-					command,
-					response
-				FROM
-					predefined_messages
-				WHERE
-					enabled = 1
-			" );
-
-			while ( $entry = $entries->fetchObject() ) {
-				$this->predefined_messages[] = array(
-					'pattern' => $entry->command,
-					'response' => $entry->response
-				);
-			}
-		} catch( PDOException $e ) {
-			echo 'PDO Exception: ' . $e->getMessage();
-		}
-	}
-
 	function message_split( $data ) {
 		$message_parse = explode( ' ', $data->message, 2 );
 		$command = $message_parse[0];
-		$message_parse = $message_parse[1];
+		$message_parse = ( count( $message_parse ) > 1 ? $message_parse[1] : '' );
 
 		$user = $data->nick;
 
@@ -206,26 +180,6 @@ class bot {
 		);
 
 		return $result;
-	}
-
-	function is_predefined_message( &$irc, &$data ) {
-		if ( $data->message[0] == '.' || $data->message[0] == '!' ) {
-			foreach ( $this->predefined_messages AS $predef ) {
-				if ( preg_match( sprintf( "/^(!|\.)%s\b/i", $predef['pattern'] ), $data->message ) ) {
-					$msg = $this->message_split( $data );
-
-					$message = sprintf(
-							'%s: %s',
-							$msg->user,
-							$predef['response']
-					);
-
-					$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
-
-					return true;
-				}
-			}
-		}
 	}
 
 	function log_event( $event, &$irc, &$data ) {
@@ -266,22 +220,123 @@ class bot {
 
 	function log_join( &$irc, &$data ) {
 		$this->log_event( 'join', $irc, $data );
+
+		$this->tell( $irc, $data );
 	}
 
 	function help_cmd( &$irc, &$data ) {
-		$message = sprintf( 'For ContriBot Help, see %s',
+		$message = sprintf( 'For WPBot Help, see %s',
 			HELP_URL
 		);
 		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+	}
+
+	function prepare_tell_notifications() {
+		$this->tell = array();
+
+		$this->pdo_ping();
+
+		try {
+			$entries = $this->db->query( "
+				SELECT
+					t.id,
+					t.time,
+					t.recipient,
+					t.sender,
+					t.message
+				FROM
+					tell t
+				WEHERE
+					t.told = 0
+			" );
+
+			while ( $entry = $entries->fetchObject() ) {
+				$this->add_tell_notification( $entry->id, $entry->recipient, $entry->time, $entry->sender, $entry->message );
+			}
+		} catch( PDOException $e ) {
+			echo 'PDO Exception: ' . $e->getMessage();
+		}
+	}
+
+	function add_tell_notification( $id, $recipient, $time, $sender, $message ) {
+		if ( ! isset( $this->tell[ $recipient ] ) ) {
+			$this->tell[ $recipient ] = array();
+		}
+
+		$this->tell[ $recipient ][] = (object) array(
+				'id'      => $id,
+				'time'    => $time,
+				'sender'  => $sender,
+				'message' => $message
+		);
+	}
+
+	function add_tell( &$irc, &$data ) {
+		$msg = $this->message_split( $data );
+
+		$this->pdo_ping();
+
+		$time = date( "Y-m-d H:i:s" );
+
+		$this->db->query( "
+			INSERT INTO
+				tell (
+					`time`,
+					`recipient`,
+					`sender`,
+					`message`
+				)
+			VALUES (
+				" . $this->db->quote( $time ) . ",
+				" . $this->db->quote( $msg->user ) . ",
+				" . $this->db->quote( $data->nick ) . ",
+				" . $this->db->quote( $msg->message ) . "
+			)
+		" );
+
+		$id = $this->db->lastInsertId();
+
+		$this->add_tell_notification( $id, $msg->user, $time, $data->nick, $msg->message );
+	}
+
+	function tell( &$irc, &$data ) {
+		if ( isset( $this->tell[ $data->nick ] ) ) {
+			$unset = array();
+			foreach( $this->tell[ $data->nick ] AS $tell ) {
+				$message = sprintf(
+					'(Tell) %s - %s @ %s: %s',
+					$data->nick,
+					$tell->sender,
+					date( "Y-m-d H:i", strtotime( $tell->time ) ),
+					$tell->message
+				);
+
+				$unset[] = $tell->id;
+
+				$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+			}
+
+			unset( $this->tell[ $data->nickname ] );
+
+			$this->pdo_ping();
+
+			$this->db->query( "
+				UPDATE
+					tell t
+				SET
+					t.told = 1
+				WHERE
+					t.id IN (" . implode( ',', $unset ) . ")
+			" );
+		}
 	}
 }
 
 /**
  * Instantiate our bot class and the SmartIRC framework
  */
-$bot     = new bot();
-$doc_bot = new DocBot();
-$irc     = new Net_SmartIRC();
+$bot = new WPBot();
+$irc = new Net_SmartIRC();
 
 /**
  * Set connection-wide configurations
@@ -294,6 +349,7 @@ $irc->setChannelSyncing( true ); // Channel sync allows us to get user details w
  * Set up hooks for events to trigger on
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'channel_query' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/^(!|\.)tell\b/', $bot, 'add_tell' );
 $irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' );
 $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
@@ -301,25 +357,25 @@ $irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
 $irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $bot, 'log_join' );
 
 /**
- * Generic commands associated purely with ContriBot
+ * Generic commands associated purely with WPBot
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)h(elp)?\b', $bot, 'help_cmd' );
 
 /**
  * DocBot class hooks
  */
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?\b', $doc_bot, 'developer' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?\b', $doc_bot, 'codex' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?\b', $doc_bot, 'plugin' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?\b', $doc_bot, 'google' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)l(mgtfy)?\b', $doc_bot, 'lmgtfy' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $doc_bot, 'language' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $doc_bot, 'count' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $doc_bot, 'md5' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)vuln\b', $doc_bot, 'wpvulndb' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)scan\b', $doc_bot, 'sucuri_scan' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\b#[0-9]+?\b', $doc_bot, 'trac_ticket' );
-$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $doc_bot, 'trac_changeset' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)d(eveloper)?\b', $bot, 'developer' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)c(odex)?\b', $bot, 'codex' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)p(lugin)?\b', $bot, 'plugin' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)g(oogle)?\b', $bot, 'google' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)l(mgtfy)?\b', $bot, 'lmgtfy' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)language\b', $bot, 'language' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)count\b', $bot, 'count' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)md5\b', $bot, 'md5' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)vuln\b', $bot, 'wpvulndb' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '^(!|\.)scan\b', $bot, 'sucuri_scan' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\b#[0-9]+?\b', $bot, 'trac_ticket' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $bot, 'trac_changeset' );
 
 /**
  * DocBot common replies

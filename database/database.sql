@@ -46,3 +46,13 @@ CREATE TABLE IF NOT EXISTS `privileged` (
   `enabled` int(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `tell` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` datetime NOT NULL,
+  `recipient` varchar(255) NOT NULL,
+  `sender` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `told` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;

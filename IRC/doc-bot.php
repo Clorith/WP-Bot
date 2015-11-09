@@ -6,31 +6,63 @@
  * Replace some frequently used doc-bot commands if the bot is
  * missing from the channel for whatever reason
  */
-class DocBot {
-	private $plugin_details = array();
+class WPBot Extends Bot {
+	private $plugin_details      = array();
+	public  $predefined_messages = array();
 
-	function message_split( $data ) {
-		$message_parse = explode( ' ', $data->message, 2 );
-		$command = $message_parse[0];
-		$message_parse = $message_parse[1];
+	function __construct() {
+		parent::__construct();
 
-		$user = $data->nick;
-
-		$message_parse = explode( '>', $message_parse );
-		if ( isset( $message_parse[1] ) && ! empty( $message_parse[1] ) ) {
-			$send_to = trim( $message_parse[1] );
-			$user = $send_to;
-		}
-		$message = trim( $message_parse[0] );
-
-		$result = (object) array(
-			'user'    => $user,
-			'message' => $message,
-			'command' => $command
-		);
-
-		return $result;
+		$this->prepare_predefined_messages();
 	}
+
+	function prepare_predefined_messages() {
+		$this->predefined_messages = array();
+
+		$this->pdo_ping();
+
+		try {
+			$entries = $this->db->query( "
+				SELECT
+					command,
+					response
+				FROM
+					predefined_messages
+				WHERE
+					enabled = 1
+			" );
+
+			while ( $entry = $entries->fetchObject() ) {
+				$this->predefined_messages[] = array(
+						'pattern' => $entry->command,
+						'response' => $entry->response
+				);
+			}
+		} catch( PDOException $e ) {
+			echo 'PDO Exception: ' . $e->getMessage();
+		}
+	}
+
+	function is_predefined_message( &$irc, &$data ) {
+		if ( $data->message[0] == '.' || $data->message[0] == '!' ) {
+			foreach ( $this->predefined_messages AS $predef ) {
+				if ( preg_match( sprintf( "/^(!|\.)%s\b/i", $predef['pattern'] ), $data->message ) ) {
+					$msg = $this->message_split( $data );
+
+					$message = sprintf(
+							'%s: %s',
+							$msg->user,
+							$predef['response']
+					);
+
+					$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
+
+					return true;
+				}
+			}
+		}
+	}
+
 	function google_result( $string ) {
 		$search = 'http://www.google.com/search?q=%s&btnI';
 

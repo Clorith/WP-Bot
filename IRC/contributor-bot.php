@@ -316,7 +316,7 @@ class Bot {
 				$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 			}
 
-			unset( $this->tell[ $data->nickname ] );
+			unset( $this->tell[ $data->nick ] );
 
 			$this->pdo_ping();
 

@@ -200,7 +200,8 @@
 							m.is_question,
 							m.is_appreciation,
 							m.is_docbot,
-							m.time
+							m.time,
+							m.event
 						FROM
 							messages m
 						WHERE
@@ -218,13 +219,32 @@
 						$icon = '';
 
 						if ( $log->is_question ) {
-							$icon .= '<span class="glyphicon glyphicon-question-sign"></span>';
+							$icon .= '<i class="fa fa-question-circle"></i>';
 						}
 						if ( false != $log->is_appreciation ) {
-							$icon .= '<span class="glyphicon glyphicon-ok-sign"></span>';
+							$icon .= '<i class="fa fa-check-circle"></i>';
 						}
 						if ( $log->is_docbot ) {
-							$icon .= '<span class="glyphicon glyphicon-info-sign"></span>';
+							$icon .= '<i class="fa fa-info-circle"></i>';
+						}
+
+						if ( 'message' == $log->event ) {
+							$icon .= '<i class="fa fa-commenting"></i>';
+						}
+						if ( 'part' == $log->event ) {
+							$icon .= '<i class="fa fa-sign-out"></i>';
+						}
+						if ( 'kick' == $log->event ) {
+							$icon .= '<i class="fa fa-futbol-o"></i>';
+						}
+						if ( 'join' == $log->event ) {
+							$icon .= '<i class="fa fa-sign-in"></i>';
+						}
+
+						if ( empty( $log->message ) ) {
+							$log->message = '<i>No message</i>';
+						} else {
+							$log->message = htmlspecialchars( $log->message );
 						}
 
 						echo '
@@ -235,7 +255,7 @@
 									</a>
 								</td>
 								<td class="nickname"><a href="details.php?nickname=' . urlencode( $log->nickname ) . '">' . $log->nickname . '</a></td>
-								<td class="message">' . htmlspecialchars( $log->message ) . '</td>
+								<td class="message">' . $log->message . '</td>
 								<td class="text-right activity">' . $icon . '</td>
 							</tr>
 						';

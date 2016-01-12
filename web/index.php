@@ -59,13 +59,13 @@
 			 * Check for message states and add icons
 			 */
 			if ( $log->is_question ) {
-				$icon .= '<span class="glyphicon glyphicon-question-sign"></span>';
+				$icon .= '<i class="fa fa-question-circle"></i>';
 			}
 			if ( false != $log->is_appreciation ) {
-				$icon .= '<span class="glyphicon glyphicon-ok-sign"></span>';
+				$icon .= '<i class="fa fa-check-circle"></i>';
 			}
 			if ( $log->is_docbot ) {
-				$icon .= '<span class="glyphicon glyphicon-info-sign"></span>';
+				$icon .= '<i class="fa fa-info-circle"></i>';
 			}
 
 			/**
@@ -80,16 +80,22 @@
 				$tr_class[] = 'warning';
 				$tr_class[] = 'status-part';
 				$log->message = '[PART] ' . $log->message;
+				$icon .= '<i class="fa fa-sign-out"></i>';
 			}
 			if ( 'kick' == $log->event ) {
 				$tr_class[] = 'danger';
 				$tr_class[] = 'status-kick';
 				$log->message = '[KICK] ' . $log->message;
+				$icon .= '<i class="fa fa-futbol-o"></i>';
 			}
 			if ( 'join' == $log->event ) {
 				$tr_class[] = 'info';
 				$tr_class[] = 'status-join';
 				$log->message = '[JOIN] ' . $log->message;
+				$icon .= '<i class="fa fa-sign-in"></i>';
+			}
+			if ( 'message' == $log->event ) {
+				$icon .= '<i class="fa fa-commenting"></i>';
 			}
 
 

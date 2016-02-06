@@ -206,6 +206,8 @@
 							messages m
 						WHERE
 							m.nickname = " . $db->quote( $_GET['nickname'] ) . "
+						AND
+							m.event NOT IN ( 'mod_request' )
 						ORDER BY
 							m.id DESC
 						LIMIT

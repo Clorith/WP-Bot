@@ -44,6 +44,8 @@
 				messages m
 			WHERE
 				m.time BETWEEN " . $db->quote( $date . ' 00:00:00' ) . " AND " . $db->quote( $date . ' 23:59:59' ) . "
+			AND
+				m.event NOT IN ( 'mod_request' )
 			ORDER BY
 				m.id DESC
 		" );

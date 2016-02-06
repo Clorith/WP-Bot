@@ -340,6 +340,72 @@ class Bot {
 
 		$irc->message( SMARTIRC_TYPE_NOTICE, $data->nick, $message );
 	}
+
+	function request_ops( &$irc, &$data ) {
+		// Break out early if there's no Slack API
+		if ( ! defined( 'SLACK_API' ) || empty( SLACK_API ) ) {
+			return;
+		}
+
+		// Get the most recent log event from the channel for use in our Slack message
+		$last_entry = $this->db->query( "
+			SELECT
+				m.id
+			FROM
+				messages m
+			ORDER BY
+				m.id DESC
+			LIMIT 1
+		" );
+		$last_entry = $last_entry->fetchObject();
+
+		/*
+		 * Log the use of the command
+		 * This is to avoid abuse of the system and allow us to move in and block abusing users
+		 */
+		$this->log_event( 'mod_request', $irc, $data );
+
+		$message = sprintf(
+			'*IRC* A request has been made for someone to intervene in <%s|#WordPress> - <|See logs>',
+			'https://webchat.freenode.net/?channels=#wordpress',
+			sprintf(
+				'http://contribot.clorith.net/?date=%s&%d',
+				date( "Y-m-d" ),
+				$last_entry->id
+			)
+		);
+
+		$this->send_slack_alert( $message );
+	}
+
+
+	function send_slack_alert( $message ) {
+		// Break out early if there's no Slack API
+		if ( ! defined( 'SLACK_API' ) || empty( SLACK_API ) ) {
+			return;
+		}
+
+		$request = array(
+				'channel'    => '#forums',
+				'username'   => 'WPBot',
+				'icon_emoji' => ':hash:',
+				'text'       => $message,
+		);
+
+		$request = json_encode( $request );
+
+		$slack = curl_init( SLACK_API );
+		curl_setopt( $slack, CURLOPT_CUSTOMREQUEST, 'POST' );
+		curl_setopt( $slack, CURLOPT_POSTFIELDS, $request );
+		curl_setopt( $slack, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $slack, CURLOPT_HTTPHEADER, array(
+				'Content-Type: application/json',
+				'Content-Length: ' . strlen( $request )
+		) );
+
+		$result = curl_exec( $slack );
+		curl_close( $slack );
+	}
 }
 
 /**
@@ -360,6 +426,8 @@ $irc->setChannelSyncing( true ); // Channel sync allows us to get user details w
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'channel_query' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/^(!|\.)tell\b/', $bot, 'add_tell' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/^(!|\.)ops/', $bot, 'request_ops' );
+$irc->registerActionHandler( SMARTIRC_TYPE_QUERY, '/^(!|\.)ops/', $bot, 'request_ops' );
 $irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' );
 $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );

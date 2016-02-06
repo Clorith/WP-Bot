@@ -330,6 +330,16 @@ class Bot {
 			" );
 		}
 	}
+
+	function new_user_guidelines( &$irc, &$data ) {
+		$message = sprintf(
+			'Welcome to #WordPress, %s, Please start off by having a look at our guidelines available at %s',
+			$data->nick,
+			'https://codex.wordpress.org/IRC/Channel_Guidelines'
+		);
+
+		$irc->message( SMARTIRC_TYPE_NOTICE, $data->nick, $message );
+	}
 }
 
 /**
@@ -355,6 +365,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );
 $irc->registerActionHandler( SMARTIRC_TYPE_QUIT, '/./', $bot, 'log_quit' );
 $irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $bot, 'log_join' );
+$irc->registerActionHandler( SMARTIRC_TYPE_JOIN, '/(.*)/', $bot, 'new_user_guidelines' );
 
 /**
  * Generic commands associated purely with WPBot
@@ -381,6 +392,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $bot, 'trac_
  * DocBot common replies
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'is_predefined_message' );
+$irc->registerActionHandler( SMARTIRC_TYPE_QUERY, '/\.predef-reload/', $bot, 'prepare_predefined_messages' );
 
 
 /**

@@ -333,12 +333,172 @@ class Bot {
 
 	function new_user_guidelines( &$irc, &$data ) {
 		$message = sprintf(
-			'Welcome to #WordPress, %s, Please start off by having a look at our guidelines available at %s',
+			'Welcome to #WordPress, %s. Please review our guidelines available at %s, and if you at any time see behavior you feel needs a second pair of eyes, you may utilize the %s command, either in the channel or in a private message to me.',
 			$data->nick,
-			'https://codex.wordpress.org/IRC/Channel_Guidelines'
+			'https://codex.wordpress.org/IRC/Channel_Guidelines',
+			chr(2) . '.ops' . chr(2)
 		);
 
 		$irc->message( SMARTIRC_TYPE_NOTICE, $data->nick, $message );
+	}
+
+	function request_ops( &$irc, &$data ) {
+		// Break out early if there's no Slack API
+		if ( ! defined( 'SLACK_API' ) ) {
+			return;
+		}
+
+		// Get the most recent log event from the channel for use in our Slack message
+		$last_entry = $this->db->query( "
+			SELECT
+				m.id
+			FROM
+				messages m
+			WHERE
+				event = 'message'
+			ORDER BY
+				m.id DESC
+			LIMIT 1
+		" );
+		$last_entry = $last_entry->fetchObject();
+
+		/*
+		 * Log the use of the command
+		 * This is to avoid abuse of the system and allow us to move in and block abusing users
+		 */
+		$this->log_event( 'mod_request', $irc, $data );
+
+		$msg = $this->message_split( $data );
+
+		$log_link = sprintf(
+			'http://contribot.clorith.net/?date=%s#%d',
+			date( "Y-m-d" ),
+			$last_entry->id
+		);
+
+		$note = ( ! empty( $msg->message ) ? sprintf( ' [%s]', $msg->message ) : '' );
+
+		$simple_message = sprintf(
+			'*IRC* assistance requested in <%s|#WordPress>%s - <%s|See logs>',
+			'https://webchat.freenode.net/?channels=#wordpress',
+			$note,
+			$log_link
+		);
+
+		$this->send_slack_alert( $simple_message );
+	}
+
+
+	function send_slack_alert( $message ) {
+		// Break out early if there's no Slack API
+		if ( ! defined( 'SLACK_API' ) ) {
+			return;
+		}
+
+		$request = array(
+			'channel'    => '#forums',
+			'username'   => 'WPBot',
+			'icon_emoji' => ':hash:',
+			'text'       => $message,
+		);
+
+		$request = json_encode( $request );
+
+		$slack = curl_init( SLACK_API );
+		curl_setopt( $slack, CURLOPT_CUSTOMREQUEST, 'POST' );
+		curl_setopt( $slack, CURLOPT_POSTFIELDS, "payload=" . $request );
+		curl_setopt( $slack, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $slack, CURLOPT_SSL_VERIFYPEER, false );
+
+		$result = curl_exec( $slack );
+		if ( false === $result ) {
+			echo "Slack cURL error: " . curl_error( $slack ) . "\n";
+			echo $request . "\n";
+		}
+
+		curl_close( $slack );
+	}
+
+	function send_rich_slack_alert( $message, $log_link, $note = null ) {
+		// Break out early if there's no Slack API
+		if ( ! defined( 'SLACK_API' ) ) {
+			return;
+		}
+
+		$logs = $this->get_logs( 5 );
+		$logs = array_reverse( $logs );
+
+		$fields = array();
+		if ( ! empty( $note ) ) {
+			$fields[] = array(
+				'title'  => 'Note',
+				'value'  => $note,
+				'short'  => false
+			);
+		}
+
+		$request = array(
+			'channel'     => '#forums',
+			'username'    => 'WPBot',
+			'icon_emoji'  => ':hash:',
+			'attachments' => array(
+				array(
+					'fallback'   => $message,
+					'color'      => 'warning',
+					'pretext'    => $message,
+					'title'      => 'Log excerpt - View logs',
+					'title_link' => $log_link,
+					'text'       => implode( "\n", $logs ),
+					'mrkdwn_in'  => array( 'pretext' ),
+					'fields'     => $fields
+				)
+			)
+		);
+
+		$request = json_encode( $request );
+
+		$slack = curl_init( SLACK_API );
+		curl_setopt( $slack, CURLOPT_CUSTOMREQUEST, 'POST' );
+		curl_setopt( $slack, CURLOPT_POSTFIELDS, "payload=" . $request );
+		curl_setopt( $slack, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $slack, CURLOPT_SSL_VERIFYPEER, false );
+
+		$result = curl_exec( $slack );
+		if ( false === $result ) {
+			echo "Slack cURL error: " . curl_error( $slack ) . "\n";
+			echo $request . "\n";
+		}
+
+		curl_close( $slack );
+	}
+
+	function get_logs( $count ) {
+		$output = array();
+
+		$entries = $this->db->query( "
+			SELECT
+				m.id,
+				m.nickname,
+				m.message,
+				m.time
+			FROM
+				messages m
+			WHERE
+				event = 'message'
+			ORDER BY
+				m.id DESC
+			LIMIT " . $count . "
+		" );
+		while( $entry = $entries->fetchObject() ) {
+			$output[] = sprintf(
+				'[%s] %s: %s',
+				date( "H:i:s", strtotime( $entry->time ) ),
+				$entry->nickname,
+				$entry->message
+			);
+		}
+
+		return $output;
 	}
 }
 
@@ -360,6 +520,8 @@ $irc->setChannelSyncing( true ); // Channel sync allows us to get user details w
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'channel_query' );
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/^(!|\.)tell\b/', $bot, 'add_tell' );
+$irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/^(!|\.)ops/', $bot, 'request_ops' );
+$irc->registerActionHandler( SMARTIRC_TYPE_QUERY, '/^(!|\.)ops/', $bot, 'request_ops' );
 $irc->registerActionHandler( SMARTIRC_TYPE_ACTION, '/./', $bot, 'channel_query' );
 $irc->registerActionHandler( SMARTIRC_TYPE_KICK, '/./', $bot, 'log_kick' );
 $irc->registerActionHandler( SMARTIRC_TYPE_PART, '/./', $bot, 'log_part' );

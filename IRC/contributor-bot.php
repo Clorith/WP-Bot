@@ -397,7 +397,7 @@ class Bot {
 
 		$request = array(
 			'channel'    => '#forums',
-			'username'   => 'WPBot',
+			'username'   => 'IRC WPBot Notifier',
 			'icon_emoji' => ':hash:',
 			'text'       => $message,
 		);
@@ -439,7 +439,7 @@ class Bot {
 
 		$request = array(
 			'channel'     => '#forums',
-			'username'    => 'WPBot',
+			'username'    => 'IRC WPBot Notifier',
 			'icon_emoji'  => ':hash:',
 			'attachments' => array(
 				array(

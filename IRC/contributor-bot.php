@@ -333,7 +333,7 @@ class Bot {
 
 	function new_user_guidelines( &$irc, &$data ) {
 		$message = sprintf(
-			'Welcome to #WordPress, %s. Please review our guidelines available at %s, and if you at any time see behavior you feel needs a second pair of eyes, you may utilize the %s command, either in the channel or in a private message to me.',
+			'Welcome to #WordPress, %s. Please review our guidelines available at %s, and if you at any time see behavior you feel is inappropriate, you may utilize the %s command, either in the channel or in a private message to notify a Support Team member.',
 			$data->nick,
 			'https://codex.wordpress.org/IRC/Channel_Guidelines',
 			chr(2) . '.ops' . chr(2)
@@ -386,6 +386,10 @@ class Bot {
 		);
 
 		$this->send_slack_alert( $simple_message );
+
+		$reply = "Your request for an operator to look into the current channel situation has been forwarded to the WordPress Support Team.";
+
+		$irc->message( SMARTIRC_TYPE_QUERY, $data->nick, $reply );
 	}
 
 

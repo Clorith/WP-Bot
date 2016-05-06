@@ -274,6 +274,14 @@ class Bot {
 	function add_tell( &$irc, &$data ) {
 		$msg = $this->message_split( $data );
 
+		$words              = explode( ' ', $data->message );
+		$delimited_position = count( $words - 2 );
+
+		if ( '>' != $words[ $delimited_position ] ) {
+			$msg->user    = $words[0];
+			$msg->message = array_shift( $words );
+		}
+
 		$this->pdo_ping();
 
 		$time = date( "Y-m-d H:i:s" );
@@ -297,6 +305,14 @@ class Bot {
 		$id = $this->db->lastInsertId();
 
 		$this->add_tell_notification( $id, $msg->user, $time, $data->nick, $msg->message );
+
+		$message = sprintf(
+			'%s: I will relay your message to %s when I see them next.',
+			$data->nick,
+			$msg->user
+		);
+
+		$irc->message( SMARTIRC_TYPE_CHANNEL, $data->channel, $message );
 	}
 
 	function tell( &$irc, &$data ) {

@@ -4,9 +4,11 @@
 PHP_PROCESSES="$(ps -C php --no-headers | wc -l)"
 WPBOT_SCREEN="$(screen -ls | grep -q WPBot)"
 
-if PHP_PROCESSES == 0 then
+if [ PHP_PROCESSES == 0 ]
+then
   # If no screen session exists, start one
-  if ! WPBOT_SCREEN then
+  if [ ! WPBOT_SCREEN ]
+  then
     screen -mdS WPBot
   fi
 

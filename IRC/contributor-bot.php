@@ -387,7 +387,7 @@ class Bot {
 		$msg = $this->message_split( $data );
 
 		$log_link = sprintf(
-			'http://contribot.clorith.net/?date=%s#%d',
+			'http://logs.wp-bot.net/?date=%s#%d',
 			date( "Y-m-d" ),
 			$last_entry->id
 		);

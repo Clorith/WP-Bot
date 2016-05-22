@@ -574,6 +574,7 @@ $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '\br[0-9]+?\b', $bot, 'trac_
  * DocBot common replies
  */
 $irc->registerActionHandler( SMARTIRC_TYPE_CHANNEL, '/./', $bot, 'is_predefined_message' );
+$irc->registerTimeHandler( 600000, $bot, 'prepare_predefined_messages' );
 $irc->registerActionHandler( SMARTIRC_TYPE_QUERY, '/\.predef-reload/', $bot, 'prepare_predefined_messages' );
 
 

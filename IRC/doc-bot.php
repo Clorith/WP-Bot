@@ -23,19 +23,28 @@ class WPBot Extends Bot {
 
 		try {
 			$entries = $this->db->query( "
-				SELECT
-					command,
-					response
-				FROM
-					predefined_messages
-				WHERE
-					enabled = 1
+				SELECT 
+					p.post_title, 
+					m.meta_value
+				FROM 
+					wp_posts p
+				LEFT JOIN 
+					wp_postmeta m 
+						ON ( m.post_id = p.ID ) 
+				WHERE 
+					p.post_status =  'publish'
+				AND 
+					p.post_type =  'wpbot_commands'
+				AND 
+					m.meta_key =  '_wpbot_command'
 			" );
-
 			while ( $entry = $entries->fetchObject() ) {
+				$meta = unserialize( $entry->meta_value );
+
 				$this->predefined_messages[] = array(
-						'pattern' => $entry->command,
-						'response' => $entry->response
+						'pattern'  => $meta['trigger'],
+						'response' => $meta['response'],
+						'uri'      => $meta['uri']
 				);
 			}
 		} catch( PDOException $e ) {
@@ -46,6 +55,9 @@ class WPBot Extends Bot {
 	function is_predefined_message( &$irc, &$data ) {
 		if ( $data->message[0] == '.' || $data->message[0] == '!' ) {
 			foreach ( $this->predefined_messages AS $predef ) {
+				if ( empty( $predef['pattern'] ) ) {
+					continue;
+				}
 				if ( preg_match( sprintf( "/^(!|\.)%s\b/i", $predef['pattern'] ), $data->message ) ) {
 					$msg = $this->message_split( $data );
 

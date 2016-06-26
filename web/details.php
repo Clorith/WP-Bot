@@ -8,48 +8,9 @@
 
 <div class="page-header">
 	<?php
-		$name_match = array();
-
-		$hostname = $db->query( "
-			SELECT
-				m.userhost
-			FROM
-				messages m
-			WHERE
-				m.nickname = " . $db->quote( $_GET['nickname'] ) . "
-			ORDER BY
-				m.id DESC
-			LIMIT 1
-		" );
-		$hostname = $hostname->fetchObject();
-		preg_match( "/^(.+?)!(.+?)@(.+?)$/si", $hostname->userhost, $hostmask );
-
-		$look_up_names = $db->query( "
-			SELECT
-				DISTINCT m.nickname
-			FROM
-				messages m
-			WHERE (
-				m.nickname LIKE " . $db->quote( '%' . $hostmask[1] . '%' ) . "
-				OR
-				m.userhost LIKE " . $db->quote( '%!' . $hostmask[2] . '@%' ) . "
-				OR
-				m.userhost LIKE " . $db->quote( '%@' . $hostmask[3] )  ."
-				)
-			AND
-				m.nickname != " . $db->quote( $_GET['nickname'] ) . "
-		" );
-		while ( $check_name = $look_up_names->fetchObject() ) {
-			$name_match[] = $check_name->nickname;
-		}
-
 		printf(
-			'<h1>%s %s</h1>',
-			htmlentities( $_GET['nickname'] ),
-			( empty( $name_match ) ? '' : sprintf(
-				'<small>Potential related names: %s</small>',
-				implode( ', ', $name_match )
-			) )
+			'<h1>%s</h1>',
+			htmlentities( $_GET['nickname'] )
 		);
 	?>
 </div>

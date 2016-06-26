@@ -182,7 +182,14 @@ class Bot {
 		return $result;
 	}
 
+	function verify_own_nickname( &$irc ) {
+		if ( BOTNICK != $irc->_nick ) {
+			$irc->login( BOTNICK, BOTNAME . ' - version ' . BOTVERSION, 0, BOTNICK, BOTPASS );
+		}
+	}
+
 	function log_event( $event, &$irc, &$data ) {
+		$this->verify_own_nickname( $irc );
 		$this->pdo_ping();
 
 		$this->db->query( "

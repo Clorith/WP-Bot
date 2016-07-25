@@ -17,7 +17,7 @@ class WPBot Extends Bot {
 	}
 
 	function prepare_predefined_messages() {
-		$this->predefined_messages = array();
+		$new_predefs = array();
 
 		$this->pdo_ping();
 
@@ -41,12 +41,14 @@ class WPBot Extends Bot {
 			while ( $entry = $entries->fetchObject() ) {
 				$meta = unserialize( $entry->meta_value );
 
-				$this->predefined_messages[] = array(
+				$new_predefs[] = array(
 						'pattern'  => $meta['trigger'],
 						'response' => $meta['response'],
 						'uri'      => $meta['uri']
 				);
 			}
+
+			$this->predefined_messages = $new_predefs;
 		} catch( PDOException $e ) {
 			echo 'PDO Exception: ' . $e->getMessage();
 		}

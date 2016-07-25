@@ -189,7 +189,7 @@ class Bot {
 	}
 
 	function log_event( $event, &$irc, &$data ) {
-		$this->verify_own_nickname( $irc );
+		//$this->verify_own_nickname( $irc );
 		$this->pdo_ping();
 
 		$this->db->query( "
@@ -282,11 +282,13 @@ class Bot {
 		$msg = $this->message_split( $data );
 
 		$words              = explode( ' ', $data->message );
-		$delimited_position = count( $words - 2 );
+		$delimited_position = count( $words ) - 2;
 
 		if ( '>' != $words[ $delimited_position ] ) {
-			$msg->user    = $words[0];
-			$msg->message = array_shift( $words );
+			$msg->user = $words[1];
+			array_shift( $words );
+			array_shift( $words );
+			$msg->message = implode( ' ', $words );
 		}
 
 		$this->pdo_ping();
